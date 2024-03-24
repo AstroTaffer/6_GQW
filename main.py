@@ -1,24 +1,17 @@
-from source_sel import get_hartman_catalog_from_file
+from filesys_io import read_json_config
+from fits_sel import rm_select_fits_files
+from source_sel import rm_select_sources
+from aper_phot import rm_sources_aperture_photometry
 
-# cfg = read_json_config('gqw_config.json')
-# fits_files = get_fits_file_paths_from_dir(cfg["IN_DIR"])
-# read_hartman_catalog_vizier(fits_files[0])
 
-m37_cat = get_hartman_catalog_from_file("H:\\STUDY TO\\Астрономия\\6_ВКР\\M37 Cat\\table6.dat")
+config = read_json_config('gqw_config.json')
+fits_files_list = rm_select_fits_files(config)
+sources_cat = rm_select_sources(fits_files_list, config)
+rm_sources_aperture_photometry(fits_files_list, sources_cat, config)
+
 
 """
 TODO (GLOBAL):
-    Формирование списка объектов через кадр
-        - Определение источников на одном кадре
-        - Поиск общих источников на двух кадрах
-        - Поиск оставшихся источников в каталоге
-    Формирование списка объектов через каталог
-        - Выгрузка каталога в радиусе от центра кадра
-        - Отсеивание источников не близких к центру кадра
-
-    На выходе: список объектов для фотометрии на всех кадрах с их небесными координатами
-
-
     ...
     - [Определение наиболее подходящей апертуры]
     - [Кросс-идентификация источников]

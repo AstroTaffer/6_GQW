@@ -1,3 +1,8 @@
 {
-  "IN_DIR": "H:\\FITS IMAGES\\2024-03-16 M37\\CALIBRATED\\i\\"
+  "IN_FITS_DIR": "H:\\FITS IMAGES\\2024-03-19 M37\\CALIBRATED\\i\\",
+  "HC_CAT_PATH": "H:\\CODING_LAIR\\6_GQW\\M37 Cat\\table6.dat",
+
+  "MAG_LIMIT": 16,
+  "IMAGE_EDGE": 100,
+  "APER_RADII": [5, 6, 7]
 }
