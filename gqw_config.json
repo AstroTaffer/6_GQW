@@ -1,8 +1,14 @@
 {
   "IN_FITS_DIR": "H:\\FITS IMAGES\\2024-03-19 M37\\CALIBRATED\\i\\",
   "HC_CAT_PATH": "H:\\CODING_LAIR\\6_GQW\\M37 Cat\\table6.dat",
+  "OUT_DIR": ".\\OUT\\",
 
   "MAG_LIMIT": 16,
   "IMAGE_EDGE": 100,
-  "APER_RADII": [5, 6, 7]
+  "APER_RADII": [5, 6, 7],
+
+  "ENS_INIT_SEARCH_R": 5,
+  "ENS_MAX_SEARCH_R": 30,
+  "ENS_MAX_MAG_DIFF": 2,
+  "ENS_MAX_SIGMA_CRIT": 2
 }

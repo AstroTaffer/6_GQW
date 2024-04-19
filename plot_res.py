@@ -4,11 +4,6 @@ from astropy.stats import sigma_clipped_stats
 
 
 def draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge):
-    """
-    - Построение апертур
-    - Сохранение результата (прописать OBJNAME в имя файла)
-    """
-
     # Step 1: Prepare data
     img_data = np.log10(img_data)
     scs_mean, scs_median, scs_std = sigma_clipped_stats(img_data[img_edge: -1 - img_edge][img_edge: -1 - img_edge])
@@ -50,4 +45,4 @@ def draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge):
     ax.imshow(img_data, vmin=dynr_min, vmax=dynr_max, origin='lower', interpolation='nearest', cmap='gray_r')
     apertures.plot(ax=ax, color='red', lw=0.3, alpha=0.8)
 
-    fig.savefig(f"Map_{img_header['OBJNAME']}.png")
+    fig.savefig(f"OUT\\map_{img_header['OBJNAME']}.png")

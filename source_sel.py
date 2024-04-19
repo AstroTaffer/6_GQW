@@ -1,16 +1,17 @@
 import warnings
 
-import numpy as np
 from astropy.wcs import WCS
-from astropy.table import Table
 
-from filesys_io import read_fits_file
+from filesys_io import *
 
 
 def rm_select_sources(ff_list, cfg):
     catalog = _read_hc_from_file(cfg['HC_CAT_PATH'], cfg['MAG_LIMIT'])
     catalog = _sel_hc_sources_by_image_edges(catalog, ff_list[0], cfg['IMAGE_EDGE'])
     print(f"{len(catalog)} applicable sources found in {cfg['HC_CAT_PATH']}\n")
+    # write_sel_src_cat(catalog, cfg['OUT_DIR'])
+
+    # catalog = read_sel_src_cat(cfg['OUT_DIR'])
     return catalog
 
 

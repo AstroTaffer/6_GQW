@@ -1,31 +1,34 @@
 import warnings
 
-import numpy as np
 import photutils as pht
 from astropy.wcs import WCS
 from astropy.stats import SigmaClip
 
-from filesys_io import read_fits_file
+from filesys_io import *
 from plot_res import draw_sky_map
 
 
 def rm_sources_aperture_photometry(ff_list, cat, cfg):
     warnings.simplefilter("ignore")
-    a, b, c = _phot_core(ff_list, cat, cfg['IMAGE_EDGE'] // 10, cfg['APER_RADII'])
-    pass
+    raw_flux, raw_magn, raw_merr = _aper_phot_core(ff_list, cat, cfg['IMAGE_EDGE'] // 10, cfg['APER_RADII'])
+    # write_phot_res(raw_flux, raw_magn, raw_merr, cfg['OUT_DIR'], prefix='raw')
+
+    # raw_flux, raw_magn, raw_merr = read_phot_res(cfg['OUT_DIR'], prefix='raw')
+    return raw_flux, raw_magn, raw_merr
 
 
-def _phot_core(ff_list, cat, img_edge, aper_radii):
+def _aper_phot_core(ff_list, cat, img_edge, aper_radii):
     apr_num = len(aper_radii)
-    img_num = len(ff_list)
+    # img_num = len(ff_list)
+    # TODO: Delete this stub
+    img_num = 5
     src_num = len(cat)
 
     raw_flux = np.zeros((apr_num, img_num, src_num))
     raw_magn = np.zeros_like(raw_flux)
     raw_merr = np.zeros_like(raw_flux)  # 1 sigma
 
-    # for _ in range(img_num):
-    for _ in range(1):
+    for _ in range(img_num):
         header, data = read_fits_file(ff_list[_])
         wcs = WCS(header)
 
@@ -63,17 +66,17 @@ def _phot_core(ff_list, cat, img_edge, aper_radii):
             raw_merr[__][_] = (1.0857 * np.sqrt(raw_flux[__][_] * header['GAIN'] +
                                                 apertures[__].area * (sky_signal * header['GAIN'] +
                                                                       header['RDNOISE'] ** 2)) /
-                               raw_flux[__][_] * header['GAIN'])
+                               (raw_flux[__][_] * header['GAIN']))
 
             raw_flux[__][_][bad_sources_mask] = np.nan
             raw_magn[__][_][bad_sources_mask] = np.nan
             raw_merr[__][_][bad_sources_mask] = np.nan
 
-        if _ == 0:
-            draw_sky_map(header, data, wcs, apertures[0], img_edge)
-            print("Celestial map plotted")
+        # if _ == 0:
+        #     draw_sky_map(header, data, wcs, apertures[0], img_edge)
+        #     print("Celestial map plotted")
 
-        if _ % 10 == 0 or _ == img_num - 1:
-            print(f"Aperture photometry: {_} images ready")
+        if _ % 10 == 9 or _ == img_num - 1:
+            print(f"Aperture photometry: Processed {_ + 1} images")
 
     return raw_flux, raw_magn, raw_merr
