@@ -30,12 +30,12 @@ def check_out_dir(out_dir):
 
 def write_ff_list(ff_list, out_dir):
     with open(f"{out_dir}ff_list.txt", 'w') as ff_file:
-        ff_file.writelines(ff_list)
+        ff_file.write('\n'.join(ff_list))
 
 
 def read_ff_list(out_dir):
     with open(f"{out_dir}ff_list.txt", 'r') as ff_file:
-        return ff_file.readlines()
+        return ff_file.read().splitlines()
 
 
 def write_sel_src_cat(src_cat, out_dir):

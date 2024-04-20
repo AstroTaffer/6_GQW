@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from astropy.stats import sigma_clipped_stats
 
 
-def draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge):
+def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge):
     # Step 1: Prepare data
     img_data = np.log10(img_data)
     scs_mean, scs_median, scs_std = sigma_clipped_stats(img_data[img_edge: -1 - img_edge][img_edge: -1 - img_edge])
@@ -46,3 +46,7 @@ def draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge):
     apertures.plot(ax=ax, color='red', lw=0.3, alpha=0.8)
 
     fig.savefig(f"OUT\\map_{img_header['OBJNAME']}.png")
+
+
+def plot_merr_graph(res_magn, res_merr):
+    fig, ax = plt.subplots(dpi=150)
