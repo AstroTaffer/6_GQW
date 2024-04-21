@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.stats import sigma_clipped_stats
+from filesys_io import check_out_dir
 
 
-def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge):
+def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge, out_dir):
     # Step 1: Prepare data
     img_data = np.log10(img_data)
     scs_mean, scs_median, scs_std = sigma_clipped_stats(img_data[img_edge: -1 - img_edge][img_edge: -1 - img_edge])
@@ -45,8 +46,38 @@ def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge):
     ax.imshow(img_data, vmin=dynr_min, vmax=dynr_max, origin='lower', interpolation='nearest', cmap='gray_r')
     apertures.plot(ax=ax, color='red', lw=0.3, alpha=0.8)
 
-    fig.savefig(f"OUT\\map_{img_header['OBJNAME']}.png")
+    fig.savefig(f"{out_dir}map_{img_header['OBJNAME']}.png")
 
 
-def plot_merr_graph(res_magn, res_merr):
-    fig, ax = plt.subplots(dpi=150)
+def _extreme_debug_plotting(flux, magn, merr, cat, cfg):
+    flux_fig, flux_ax = plt.subplots(dpi=150)
+    magn_fig, magn_ax = plt.subplots(dpi=150)
+    merr_fig, merr_ax = plt.subplots(dpi=150)
+
+    check_out_dir(f".\\OUT\\DRFlux\\")
+    check_out_dir(f".\\OUT\\DRMagn\\")
+    check_out_dir(f".\\OUT\\DRMerr\\")
+
+    for _ in range(100):
+    # for _ in range(len(cat)):
+        for __ in range(len(cfg['APER_RADII'])):
+            flux_ax.plot(flux[__, :, _], label=f"R = {cfg['APER_RADII'][__]}")
+            magn_ax.plot(magn[__, :, _], label=f"R = {cfg['APER_RADII'][__]}")
+            merr_ax.plot(merr[__, :, _], label=f"R = {cfg['APER_RADII'][__]}")
+
+        flux_ax.set_ylabel("Flux, ADU")
+        magn_ax.set_ylabel("Magn, m")
+        merr_ax.set_ylabel("Merr, m")
+        flux_ax.grid()
+        flux_ax.legend()
+        magn_ax.grid()
+        magn_ax.legend()
+        merr_ax.grid()
+        merr_ax.legend()
+
+        flux_fig.savefig(f".\\OUT\\DRFlux\\{cat['ID'][_]}.png")
+        magn_fig.savefig(f".\\OUT\\DRMagn\\{cat['ID'][_]}.png")
+        merr_fig.savefig(f".\\OUT\\DRMerr\\{cat['ID'][_]}.png")
+        flux_ax.cla()
+        magn_ax.cla()
+        merr_ax.cla()
