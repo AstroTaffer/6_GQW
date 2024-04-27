@@ -1,28 +1,27 @@
+import numpy as np
 from astropy.wcs import WCS
+from astropy.table import Table
 
-from filesys_io import *
+from filesys_io import read_fits_file
 
 
 def rm_select_sources(ff_list, cfg):
-    # cat = _read_hc_from_file(cfg['HC_CAT_PATH'], cfg['MAG_LIMIT'])
-    # cat = _sel_hc_sources_by_image_edges(cat, ff_list[0], cfg['IMAGE_EDGE'])
-    # print(f"{len(cat)} applicable sources found in {cfg['HC_CAT_PATH']}\n")
-
-    # write_sel_src_cat(cat, cfg['OUT_DIR'])
-
-    cat = read_sel_src_cat(cfg['OUT_DIR'])
+    cat = _read_hc_from_file(cfg['HC_CAT_PATH'], cfg['CAT_MAG_LIMIT'])
+    cat = _sel_hc_sources_by_image_edges(cat, ff_list[0], cfg['IMAGE_EDGE'])
+    print(f"{len(cat)} sources selected found in {cfg['HC_CAT_PATH']}\n")
 
     return cat
 
 
-def _read_hc_from_file(cat_path, mag_limit):
+def _read_hc_from_file(cat_path, cml):
     cat = Table.read(cat_path, format='ascii.fixed_width_no_header',
                      names=('ID', 'RAh', 'RAm', 'RAs', 'DE-', 'DEd', 'DEm', 'DEs',
                             'rmag', 'imag', 'e_rmag', 'e_imag'),
                      col_starts=(0, 7, 10, 13, 19, 20, 23, 26, 38, 45, 58, 64),
                      col_ends=(5, 8, 11, 17, 19, 21, 24, 29, 43, 50, 62, 68))
 
-    cat.remove_rows(np.where((cat['rmag'] > mag_limit) | (cat['imag'] > mag_limit)))
+    cat.remove_rows(np.where(cat['imag'] > cml))
+    # cat.remove_rows(np.where(cat['rmag'] > cml))
 
     cat.add_column(np.zeros(len(cat)), index=1, name='RAJ2000')
     cat['RAJ2000'] = (cat['RAh'] + cat['RAm'] / 60 + cat['RAs'] / 3600) * 15

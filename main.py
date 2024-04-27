@@ -1,22 +1,45 @@
-from filesys_io import read_json_config
+import numpy as np
+
+from filesys_io import *
 from sel_images import rm_select_fits_files
 from sel_sources import rm_select_sources
 from phot_aper import rm_sources_aperture_photometry
 from phot_diff import rm_sources_ensemble_photometry
-from res_plot import _extreme_debug_plotting
+from res_plot import _extreme_debug_plotting, _bool__flux_debug
 
+
+# Step 1: Read JSON config file
 config = read_json_config('gqw_config.json')
-fits_files_list = rm_select_fits_files(config)
-sources_catalog = rm_select_sources(fits_files_list, config)
-raw_flux, raw_magn, raw_merr = rm_sources_aperture_photometry(fits_files_list, sources_catalog, config)
 
 
+# Step 2: List FITS files
+# fits_files_list = rm_select_fits_files(config)
+# write_ff_list(fits_files_list, config['OUT_DIR'])
+fits_files_list = read_ff_list(config['OUT_DIR'])
 
+
+# Step 3: Select sources
+# sources_catalog = rm_select_sources(fits_files_list, config)
+# write_sel_src_cat(sources_catalog, config['OUT_DIR'])
+sources_catalog = read_sel_src_cat(config['OUT_DIR'])
+
+
+# Step 4: Aperture photometry
+# raw_flux, raw_magn, raw_merr = rm_sources_aperture_photometry(fits_files_list, sources_catalog, config)
+# write_phot_res(raw_flux, raw_magn, raw_merr, config['OUT_DIR'], prefix='raw')
+# write_sel_src_cat(sources_catalog, config['OUT_DIR'])
+raw_flux, raw_magn, raw_merr = read_phot_res(config['OUT_DIR'], prefix='raw')
+
+
+# Step 5: Ensemble photometry
 clr_magn, clr_merr = rm_sources_ensemble_photometry(raw_magn, raw_merr, sources_catalog, config)
+# write_phot_res(None, clr_magn, clr_merr, config['OUT_DIR'], prefix='clr')
+# clr_flux, clr_magn, clr_merr = read_phot_res(config['OUT_DIR'], prefix='clr')
 
 
+# Step -1: Debug
+# _bool__flux_debug(raw_flux, sources_catalog, config)
 # _extreme_debug_plotting(raw_flux, raw_magn, raw_merr, sources_catalog, config)
-
 
 
 # from diff_phot import rm_sources_ensemble_photometry

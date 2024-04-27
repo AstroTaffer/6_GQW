@@ -50,16 +50,15 @@ def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge, out_dir):
 
 
 def _extreme_debug_plotting(flux, magn, merr, cat, cfg):
-    flux_fig, flux_ax = plt.subplots(dpi=150)
-    magn_fig, magn_ax = plt.subplots(dpi=150)
-    merr_fig, merr_ax = plt.subplots(dpi=150)
-
     check_out_dir(f".\\OUT\\DRFlux\\")
     check_out_dir(f".\\OUT\\DRMagn\\")
     check_out_dir(f".\\OUT\\DRMerr\\")
 
-    for _ in range(100):
-    # for _ in range(len(cat)):
+    flux_fig, flux_ax = plt.subplots(dpi=150)
+    magn_fig, magn_ax = plt.subplots(dpi=150)
+    merr_fig, merr_ax = plt.subplots(dpi=150)
+
+    for _ in range(len(cat)):
         for __ in range(len(cfg['APER_RADII'])):
             flux_ax.plot(flux[__, :, _], label=f"R = {cfg['APER_RADII'][__]}")
             magn_ax.plot(magn[__, :, _], label=f"R = {cfg['APER_RADII'][__]}")
@@ -81,3 +80,29 @@ def _extreme_debug_plotting(flux, magn, merr, cat, cfg):
         flux_ax.cla()
         magn_ax.cla()
         merr_ax.cla()
+
+
+def _bool__flux_debug(flux, cat, cfg):
+    has_negatives = (flux < 0).any(axis=1)
+    has_nans = np.isnan(flux).any(axis=1)
+
+    check_out_dir(f".\\OUT\\DRBool\\")
+
+    neg_fig, neg_ax = plt.subplots(dpi=150)
+    nan_fig, nan_ax = plt.subplots(dpi=150)
+
+    for _ in range(len(cfg['APER_RADII'])):
+        neg_ax.plot(cat['imag'], has_negatives[_], "r.", markersize=2)
+        nan_ax.plot(cat['imag'], has_nans[_], "r.", markersize=2)
+
+        neg_ax.set_ylabel("Has negatives")
+        neg_ax.set_xlabel("imag, m")
+        neg_ax.grid()
+        nan_ax.set_ylabel("Has NaNs")
+        nan_ax.set_xlabel("imag, m")
+        nan_ax.grid()
+
+        neg_fig.savefig(f".\\OUT\\DRBool\\neg_{cfg['APER_RADII'][_]}.png")
+        neg_ax.cla()
+        nan_fig.savefig(f".\\OUT\\DRBool\\nan_{cfg['APER_RADII'][_]}.png")
+        nan_ax.cla()
