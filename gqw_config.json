@@ -3,9 +3,9 @@
   "HC_CAT_PATH": "H:\\CODING_LAIR\\6_GQW\\M37 Cat\\table6.dat",
   "OUT_DIR": ".\\OUT\\",
 
-  "CAT_MAG_LIMIT": 16,
+  "CAT_MAG_LIMIT": 17,
   "IMAGE_EDGE": 100,
-  "APER_RADII": [3, 5, 7],
+  "APER_RADII": [3, 5, 7, 9],
 
   "ENS_INIT_SEARCH_R": 5,
   "ENS_MAX_SEARCH_R": 30,

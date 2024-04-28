@@ -1,9 +1,7 @@
-import numpy as np
-
 from filesys_io import *
 from sel_images import rm_select_fits_files
 from sel_sources import rm_select_sources
-from phot_aper import rm_sources_aperture_photometry
+from phot_aper import rm_sources_aperture_photometry, _aper_phot_altfull
 from phot_diff import rm_sources_ensemble_photometry
 from res_plot import _extreme_debug_plotting, _bool__flux_debug
 
@@ -32,7 +30,7 @@ raw_flux, raw_magn, raw_merr = read_phot_res(config['OUT_DIR'], prefix='raw')
 
 
 # Step 5: Ensemble photometry
-clr_magn, clr_merr = rm_sources_ensemble_photometry(raw_magn, raw_merr, sources_catalog, config)
+# clr_magn, clr_merr = rm_sources_ensemble_photometry(raw_magn, raw_merr, sources_catalog, config)
 # write_phot_res(None, clr_magn, clr_merr, config['OUT_DIR'], prefix='clr')
 # clr_flux, clr_magn, clr_merr = read_phot_res(config['OUT_DIR'], prefix='clr')
 
@@ -40,11 +38,4 @@ clr_magn, clr_merr = rm_sources_ensemble_photometry(raw_magn, raw_merr, sources_
 # Step -1: Debug
 # _bool__flux_debug(raw_flux, sources_catalog, config)
 # _extreme_debug_plotting(raw_flux, raw_magn, raw_merr, sources_catalog, config)
-
-
-# from diff_phot import rm_sources_ensemble_photometry
-# from get_results import rm_get_results
-#
-#
-# # clr_magn, clr_merr = rm_sources_ensemble_photometry(raw_magn, raw_merr, sources_cat, config)
-# sources_cat, res_magn, res_merr = rm_get_results(raw_magn, raw_merr, sources_cat, config)
+# _aper_phot_altfull(sources_catalog)
