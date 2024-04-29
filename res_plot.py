@@ -4,6 +4,15 @@ from astropy.stats import sigma_clipped_stats
 from filesys_io import check_out_dir
 
 
+def rm_plot_results():
+    # Округли результаты
+
+    # Для каждой апертуры построй следующие графики, если не None:
+    #   - 123
+
+    pass
+
+
 def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge, out_dir):
     # Step 1: Prepare data
     img_data = np.log10(img_data)
@@ -49,7 +58,7 @@ def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge, out_dir):
     fig.savefig(f"{out_dir}map_{img_header['OBJNAME']}.png")
 
 
-def _extreme_debug_plotting(flux, magn, merr, cat, cfg):
+def _debug_extreme_ploting(flux, magn, merr, cat, cfg):
     check_out_dir(f".\\OUT\\DRFlux\\")
     check_out_dir(f".\\OUT\\DRMagn\\")
     check_out_dir(f".\\OUT\\DRMerr\\")
@@ -82,7 +91,7 @@ def _extreme_debug_plotting(flux, magn, merr, cat, cfg):
         merr_ax.cla()
 
 
-def _bool__flux_debug(flux, cat, cfg):
+def _debug_bool_nans_and_negs(flux, cat, cfg):
     has_negatives = (flux < 0).any(axis=1)
     has_nans = np.isnan(flux).any(axis=1)
 

@@ -32,10 +32,10 @@ def _aper_phot_core(ff_list, cat, img_edge, aper_radii, out_dir):
     raw_magn = np.zeros_like(raw_flux)
     raw_merr = np.zeros_like(raw_flux)  # 1 \sigma
 
-    if 'SKY' in cat.colnames:
-        cat.remove_column('SKY')
-    if 'SKY_RMS' in cat.colnames:
-        cat.remove_column('SKY_RMS')
+    # if 'SKY' in cat.colnames:
+    #     cat.remove_column('SKY')
+    # if 'SKY_RMS' in cat.colnames:
+    #     cat.remove_column('SKY_RMS')
 
     for img_id in range(img_num):
         header, data = read_fits_file(ff_list[img_id])
@@ -72,7 +72,6 @@ def _aper_phot_core(ff_list, cat, img_edge, aper_radii, out_dir):
 
         for apr_id in range(apr_num):
             buff_max = ApertureStats(data, apertures[apr_id]).max
-            raw_flux[apr_id][img_id] = buff_flux[f'aperture_sum_{apr_id}']
             raw_flux[apr_id][img_id] = np.where((bad_src_mask | (buff_max > 60000) |
                                                  (buff_flux[f'aperture_sum_{apr_id}'] < 0)),
                                                 np.nan, buff_flux[f'aperture_sum_{apr_id}'])
