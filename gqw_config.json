@@ -3,6 +3,7 @@
   "HC_CAT_PATH": "H:\\CODING_LAIR\\6_GQW\\M37 Cat\\table6.dat",
   "OUT_DIR": ".\\OUT\\",
 
+  "CAT_FILTER_COLNAME": "imag",
   "CAT_MAG_LIMIT": 17,
   "IMAGE_EDGE": 100,
   "APER_RADII": [3, 5, 7, 9],
