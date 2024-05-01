@@ -33,7 +33,7 @@ raw_flux, raw_magn, raw_merr = read_phot_res(config['OUT_DIR'], prefix='raw')
 # alt_clr_flux, alt_clt_magn = _diff_phot_fluxcore(raw_flux)
 # write_phot_res(alt_clr_flux, alt_clt_magn, None, config['OUT_DIR'], prefix='alt_clr')
 clr_magn, clr_merr = rm_sources_ensemble_photometry(raw_magn, raw_merr, sources_catalog, config)
-write_phot_res(None, clr_magn, clr_merr, config['OUT_DIR'], prefix='clr')
+write_phot_res(None, clr_magn, clr_merr, config['OUT_DIR'], prefix='old_clr')
 # clr_flux, clr_magn, clr_merr = read_phot_res(config['OUT_DIR'], prefix='clr')
 # clr_flux, clr_magn, clr_merr = read_phot_res(config['OUT_DIR'], prefix='alt_clr')
 
