@@ -34,8 +34,8 @@ sources_catalog = read_sel_src_cat(config['OUT_DIR'])
 # write_phot_res(alt_flux, alt_magn, None, config['OUT_DIR'], prefix='alt')
 # clr_magn, clr_merr = rm_sources_ensemble_photometry(raw_magn, raw_merr, sources_catalog, config)
 # write_phot_res(None, clr_magn, clr_merr, config['OUT_DIR'], prefix='clr')
-# clr_flux, clr_magn, clr_merr = read_phot_res(config['OUT_DIR'], prefix='clr')
-clr_flux, clr_magn, clr_merr = read_phot_res(config['OUT_DIR'], prefix='alt')
+clr_flux, clr_magn, clr_merr = read_phot_res(config['OUT_DIR'], prefix='clr')
+# clr_flux, clr_magn, clr_merr = read_phot_res(config['OUT_DIR'], prefix='alt')
 
 
 # Step 6: Plot results

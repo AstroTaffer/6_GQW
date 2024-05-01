@@ -4,11 +4,11 @@ import astropy.units as u
 
 
 def rm_sources_ensemble_photometry(raw_magn, raw_merr, cat, cfg):
-    # clr_magn, clr_merr = _diff_phot_core(raw_magn, raw_merr, cat, cfg['APER_RADII'], cfg['CAT_FILTER_COLNAME'],
-    #                                      cfg['ENS_MAX_MAG_DIFF'], cfg['ENS_MAX_SIGMA_CRIT'])
-    clr_magn, clr_merr = _diff_phot_altcore(raw_magn, raw_merr, cat, cfg['APER_RADII'],
-                                            cfg['ENS_INIT_SEARCH_R'], cfg['ENS_MAX_SEARCH_R'],
-                                            cfg['ENS_MAX_MAG_DIFF'], cfg['ENS_MAX_SIGMA_CRIT'])
+    clr_magn, clr_merr = _diff_phot_core(raw_magn, raw_merr, cat, cfg['APER_RADII'], cfg['CAT_FILTER_COLNAME'],
+                                         cfg['ENS_MAX_MAG_DIFF'], cfg['ENS_MAX_SIGMA_CRIT'])
+    # clr_magn, clr_merr = _diff_phot_oldcore(raw_magn, raw_merr, cat, cfg['APER_RADII'], cfg['CAT_FILTER_COLNAME'],
+    #                                         cfg['ENS_INIT_SEARCH_R'], cfg['ENS_MAX_SEARCH_R'],
+    #                                         cfg['ENS_MAX_MAG_DIFF'], cfg['ENS_MAX_SIGMA_CRIT'])
     return clr_magn, clr_merr
 
 
@@ -32,14 +32,13 @@ def _diff_phot_core(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_mmd, en
                 clr_merr[apr_id, :, target_id] = np.nan
                 continue
 
-            src_imag_diff = np.abs(cat[cat_filter] - cat[cat_filter][target_id])
+            src_mag_diff = np.abs(cat[cat_filter] - cat[cat_filter][target_id])
 
             # Pick the sources that are:
             #   2. Not too bright or too dim
             #   3. "All-finite"
             # NOTE: Target_star is included if not excluded by 3rd criteria
-            ens_src_ids = np.where((src_imag_diff <= ens_mmd) &
-                                   # (src_rmag_diff <= ens_mmd) &
+            ens_src_ids = np.where((src_mag_diff <= ens_mmd) &
                                    src_is_all_fin)[0]
 
             # Step 2: Set the sigma_crit loop
@@ -80,9 +79,11 @@ def _diff_phot_core(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_mmd, en
     return clr_magn, clr_merr
 
 
-def _diff_phot_altcore(raw_magn, raw_merr, cat, aper_radii, ens_isr, ens_msr, ens_mmd, ens_msc):
+def _diff_phot_oldcore(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_isr, ens_msr, ens_mmd, ens_msc):
     clr_magn = np.zeros_like(raw_magn)
     clr_merr = np.zeros_like(raw_magn)
+    ens_corr = 0
+    ens_src_merr = 0
 
     src_sc = SkyCoord(ra=cat['RAJ2000'] * u.deg, dec=cat['DEJ2000'] * u.deg, frame='icrs')
 
@@ -103,8 +104,7 @@ def _diff_phot_altcore(raw_magn, raw_merr, cat, aper_radii, ens_isr, ens_msr, en
             # Step 1: Set search_radius loop
             search_radius = ens_isr
             src_sep = src_sc[target_id].separation(src_sc)
-            src_imag_diff = np.abs(cat['imag'] - cat['imag'][target_id])
-            # src_rmag_diff = np.abs(cat['rmag'] - cat['rmag'][target_id])
+            src_mag_diff = np.abs(cat[cat_filter] - cat[cat_filter][target_id])
 
             while search_radius <= ens_msr:
                 # Pick the sources that are:
@@ -113,8 +113,7 @@ def _diff_phot_altcore(raw_magn, raw_merr, cat, aper_radii, ens_isr, ens_msr, en
                 #   3. "All-finite"
                 # NOTE: Target_star is included if not excluded by 3rd criteria
                 ens_src_ids = np.where((src_sep <= search_radius * u.arcmin) &
-                                       (src_imag_diff <= ens_mmd) &
-                                       # (src_rmag_diff <= ens_mmd) &
+                                       (src_mag_diff <= ens_mmd) &
                                        src_is_all_fin)[0]
 
                 # If couldn't find enough sources at all
