@@ -2,12 +2,12 @@ import numpy as np
 
 
 def rm_sources_ensemble_photometry(raw_magn, raw_merr, cat, cfg):
-    clr_magn, clr_merr = _diff_phot_core(raw_magn, raw_merr, cat, cfg['APER_RADII'],
+    clr_magn, clr_merr = _diff_phot_core(raw_magn, raw_merr, cat, cfg['APER_RADII'], cfg['CAT_FILTER_COLNAME'],
                                          cfg['ENS_MAX_MAG_DIFF'], cfg['ENS_MAX_SIGMA_CRIT'])
     return clr_magn, clr_merr
 
 
-def _diff_phot_core(raw_magn, raw_merr, cat, aper_radii, ens_mmd, ens_msc):
+def _diff_phot_core(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_mmd, ens_msc):
     clr_magn = np.zeros_like(raw_magn)
     clr_merr = np.zeros_like(raw_magn)
     ens_corr = 0
@@ -27,8 +27,7 @@ def _diff_phot_core(raw_magn, raw_merr, cat, aper_radii, ens_mmd, ens_msc):
                 clr_merr[apr_id, :, target_id] = np.nan
                 continue
 
-            src_imag_diff = np.abs(cat['imag'] - cat['imag'][target_id])
-            # src_rmag_diff = np.abs(cat['rmag'] - cat['rmag'][target_id])
+            src_imag_diff = np.abs(cat[cat_filter] - cat[cat_filter][target_id])
 
             # Pick the sources that are:
             #   2. Not too bright or too dim

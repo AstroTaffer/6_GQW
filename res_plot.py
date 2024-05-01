@@ -4,13 +4,89 @@ from astropy.stats import sigma_clipped_stats
 from filesys_io import check_out_dir
 
 
-def rm_plot_results():
-    # Округли результаты
+def rm_plot_results(rb_magn, rb_merr, cat, cfg, prefix='unknw'):
+    out_dir = f"{cfg['OUT_DIR']}{prefix}\\"
+    check_out_dir(out_dir)
 
-    # Для каждой апертуры построй следующие графики, если не None:
-    #   - 123
+    cat_magn = cat[cfg['CAT_FILTER_COLNAME']]
+    aper_radii = cfg['APER_RADII']
 
-    pass
+    _plot_magn(rb_magn, cat_magn, aper_radii, out_dir)
+    _plot_std_magn(cat_magn, rb_magn, aper_radii, out_dir)
+    _plot_delta_magn(cat_magn, rb_magn, aper_radii, out_dir)
+    if rb_merr is not None:
+        _plot_merr(cat_magn, rb_merr, aper_radii, out_dir)
+
+# TODO:
+#  - round results
+#  - std vs mad_std
+#  - mean vs median and '<>'
+#  - .invert_yaxis()
+#  - plot color terms
+
+
+def _plot_magn(rb_magn, cat_magn, aper_radii, out_dir):
+    median_rb_magn = np.nanmedian(rb_magn, axis=1)
+
+    fig, ax = plt.subplots(dpi=150)
+
+    for _ in range(len(aper_radii)):
+        ax.plot(median_rb_magn[_], cat_magn, 'k.', markersize=2)
+
+        ax.set_xlabel(r'$\langle m_{RP} \rangle$, mag')
+        ax.set_ylabel(r'$m_{CAT}$, mag')
+        ax.grid()
+
+        fig.savefig(f'{out_dir}magn_{aper_radii[_]}.png')
+        ax.cla()
+
+
+def _plot_std_magn(cat_magn, rb_magn, aper_radii, out_dir):
+    std_rb_magn = np.nanstd(rb_magn, axis=1)
+
+    fig, ax = plt.subplots(dpi=150)
+
+    for _ in range(len(aper_radii)):
+        ax.plot(cat_magn, std_rb_magn[_], 'k.', markersize=2)
+
+        ax.set_xlabel(r'$m_{CAT}$, mag')
+        ax.set_ylabel(r'$\langle \sigma_{m_{RP}} \rangle$, mag')
+        ax.grid()
+
+        fig.savefig(f'{out_dir}std_{aper_radii[_]}.png')
+        ax.cla()
+
+
+def _plot_delta_magn(cat_magn, rb_magn, aper_radii, out_dir):
+    delta_magn = np.nanmedian(rb_magn, axis=1) - cat_magn
+
+    fig, ax = plt.subplots(dpi=150)
+
+    for _ in range(len(aper_radii)):
+        ax.plot(cat_magn, delta_magn[_], 'k.', markersize=2)
+
+        ax.set_xlabel(r'$m_{CAT}$, mag')
+        ax.set_ylabel(r'$\langle m_{RP} \rangle - m_{CAT}$, mag')
+        ax.grid()
+
+        fig.savefig(f'{out_dir}delta_{aper_radii[_]}.png')
+        ax.cla()
+
+
+def _plot_merr(cat_magn, rb_merr, aper_radii, out_dir):
+    median_rb_merr = np.nanmedian(rb_merr, axis=1)
+
+    fig, ax = plt.subplots(dpi=150)
+
+    for _ in range(len(aper_radii)):
+        ax.plot(cat_magn, median_rb_merr[_], 'k.', markersize=2)
+
+        ax.set_xlabel(r'$m_{CAT}$, mag')
+        ax.set_ylabel(r'$\langle m_{err_{RP}} \rangle$, mag')
+        ax.grid()
+
+        fig.savefig(f'{out_dir}merr_{aper_radii[_]}.png')
+        ax.cla()
 
 
 def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge, out_dir):
