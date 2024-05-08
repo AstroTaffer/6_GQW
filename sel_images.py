@@ -3,10 +3,10 @@ from os import listdir
 from filesys_io import read_fits_file
 
 
-def rm_select_fits_files(cfg):
-    ff_list = _list_ff_in_dir(cfg['IN_FITS_DIR'])
+def rm_select_fits_files(ff_dir):
+    ff_list = _list_ff_in_dir(ff_dir)
     ff_list = _sel_ff_with_wcs(ff_list)
-    print(f"\n{len(ff_list)} fits files selected in {cfg['IN_FITS_DIR']}")
+    print(f"{len(ff_list)} fits files selected in {ff_dir}")
 
     return ff_list
 

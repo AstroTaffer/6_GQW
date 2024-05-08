@@ -14,11 +14,11 @@ from filesys_io import read_fits_file
 from res_plot import _draw_sky_map
 
 
-def rm_sources_aperture_photometry(ff_list, cat, cfg):
+def rm_sources_aperture_photometry(ff_list, cat, cfg, prefix='unknw'):
     warnings.simplefilter("ignore")
 
     raw_flux, raw_magn, raw_merr = _aper_phot_core(ff_list, cat, cfg['IMAGE_EDGE'] // 10,
-                                                   cfg['APER_RADII'], cfg['OUT_DIR'])
+                                                   cfg['APER_RADII'], f"{cfg['OUT_DIR']}{prefix}\\{prefix}_")
 
     return raw_flux, raw_magn, raw_merr
 
@@ -32,10 +32,7 @@ def _aper_phot_core(ff_list, cat, img_edge, aper_radii, out_dir):
     raw_magn = np.zeros_like(raw_flux)
     raw_merr = np.zeros_like(raw_flux)  # 1 \sigma
 
-    # if 'SKY' in cat.colnames:
-    #     cat.remove_column('SKY')
-    # if 'SKY_RMS' in cat.colnames:
-    #     cat.remove_column('SKY_RMS')
+    fwhm = np.zeros(img_num)
 
     for img_id in range(img_num):
         header, data = read_fits_file(ff_list[img_id])
@@ -59,9 +56,9 @@ def _aper_phot_core(ff_list, cat, img_edge, aper_radii, out_dir):
         kernel.normalize()
         # I cut a corner here by using sky_flux_rms
         segm_data = detect_sources(convolve(data, kernel), 50 * sky_flux_rms, npixels=5)
-        fwhm = np.nanmedian(SourceCatalog(data, segm_data).fwhm.value)
+        fwhm[img_id] = np.nanmedian(SourceCatalog(data, segm_data).fwhm.value)
 
-        circ_ftpt = circular_footprint(int(fwhm * 2))
+        circ_ftpt = circular_footprint(int(fwhm[img_id] * 2))
 
         ctr_x_coords, ctr_y_coords = centroid_sources(data,
                                                       xpos=src_xy_coords[0],
@@ -89,8 +86,7 @@ def _aper_phot_core(ff_list, cat, img_edge, aper_radii, out_dir):
         if img_id % 10 == 9 or img_id == img_num - 1:
             print(f"Aperture photometry: Processed {img_id + 1} images")
 
-    # cat.add_columns([sky_flux, sky_flux_rms], names=['SKY', 'SKY_RMS'])
-    print('')
+    print(f'Median FWHM is {np.median(fwhm)} ({src_num})')
 
     return raw_flux, raw_magn, raw_merr
 

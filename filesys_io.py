@@ -19,7 +19,8 @@ def read_fits_file(ff_name):
 def read_json_config(file_name):
     with open(file_name, 'r') as config_file:
         config = json.load(config_file)
-        check_out_dir(config['OUT_DIR'])
+        check_out_dir(f"{config['OUT_DIR']}r\\")
+        check_out_dir(f"{config['OUT_DIR']}i\\")
         return config
 
 
@@ -28,23 +29,23 @@ def check_out_dir(out_dir):
         makedirs(out_dir)
 
 
-def write_ff_list(ff_list, out_dir):
-    with open(f"{out_dir}ff_list.txt", 'w') as ff_file:
+def write_ff_list(ff_list, out_dir, prefix='unknw'):
+    with open(f"{out_dir}{prefix}_ff_list.txt", 'w') as ff_file:
         ff_file.write('\n'.join(ff_list))
 
 
-def read_ff_list(out_dir):
-    with open(f"{out_dir}ff_list.txt", 'r') as ff_file:
+def read_ff_list(out_dir, prefix='unknw'):
+    with open(f"{out_dir}{prefix}_ff_list.txt", 'r') as ff_file:
         return ff_file.read().splitlines()
 
 
-def write_sel_src_cat(src_cat, out_dir):
-    src_cat.write(f"{out_dir}src_cat.txt", overwrite=True, delimiter='\t',
+def write_sel_src_cat(src_cat, out_dir, prefix='unknw'):
+    src_cat.write(f"{out_dir}{prefix}_src_cat.txt", overwrite=True, delimiter='\t',
                   format='ascii.commented_header', fill_values=[(masked, 'nan')])
 
 
-def read_sel_src_cat(out_dir):
-    return Table.read(f"{out_dir}src_cat.txt", delimiter='\t', format='ascii.commented_header',
+def read_sel_src_cat(out_dir, prefix='unknw'):
+    return Table.read(f"{out_dir}{prefix}_src_cat.txt", delimiter='\t', format='ascii.commented_header',
                       fill_values=[(masked, 'nan')])
 
 

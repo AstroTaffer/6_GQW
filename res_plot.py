@@ -28,7 +28,7 @@ def rm_plot_results(rb_magn, rb_merr, cat, cfg, prefix='unknw'):
 def _plot_magn(rb_magn, cat_magn, aper_radii, out_dir):
     median_rb_magn = np.nanmedian(rb_magn, axis=1)
 
-    fig, ax = plt.subplots(dpi=150)
+    fig, ax = plt.subplots(dpi=300)
 
     for _ in range(len(aper_radii)):
         ax.plot(median_rb_magn[_], cat_magn, 'k.', markersize=2)
@@ -44,7 +44,7 @@ def _plot_magn(rb_magn, cat_magn, aper_radii, out_dir):
 def _plot_std_magn(cat_magn, rb_magn, aper_radii, out_dir):
     std_rb_magn = np.nanstd(rb_magn, axis=1)
 
-    fig, ax = plt.subplots(dpi=150)
+    fig, ax = plt.subplots(dpi=300)
 
     for _ in range(len(aper_radii)):
         ax.plot(cat_magn, std_rb_magn[_], 'k.', markersize=2)
@@ -60,7 +60,7 @@ def _plot_std_magn(cat_magn, rb_magn, aper_radii, out_dir):
 def _plot_delta_magn(cat_magn, rb_magn, aper_radii, out_dir):
     delta_magn = np.nanmedian(rb_magn, axis=1) - cat_magn
 
-    fig, ax = plt.subplots(dpi=150)
+    fig, ax = plt.subplots(dpi=300)
 
     for _ in range(len(aper_radii)):
         ax.plot(cat_magn, delta_magn[_], 'k.', markersize=2)
@@ -76,7 +76,7 @@ def _plot_delta_magn(cat_magn, rb_magn, aper_radii, out_dir):
 def _plot_merr(cat_magn, rb_merr, aper_radii, out_dir):
     median_rb_merr = np.nanmedian(rb_merr, axis=1)
 
-    fig, ax = plt.subplots(dpi=150)
+    fig, ax = plt.subplots(dpi=300)
 
     for _ in range(len(aper_radii)):
         ax.plot(cat_magn, median_rb_merr[_], 'k.', markersize=2)
@@ -139,9 +139,9 @@ def _debug_extreme_ploting(flux, magn, merr, cat, cfg):
     check_out_dir(f".\\OUT\\DRMagn\\")
     check_out_dir(f".\\OUT\\DRMerr\\")
 
-    flux_fig, flux_ax = plt.subplots(dpi=150)
-    magn_fig, magn_ax = plt.subplots(dpi=150)
-    merr_fig, merr_ax = plt.subplots(dpi=150)
+    flux_fig, flux_ax = plt.subplots(dpi=300)
+    magn_fig, magn_ax = plt.subplots(dpi=300)
+    merr_fig, merr_ax = plt.subplots(dpi=300)
 
     for _ in range(len(cat)):
         for __ in range(len(cfg['APER_RADII'])):
@@ -173,8 +173,8 @@ def _debug_bool_nans_and_negs(flux, cat, cfg):
 
     check_out_dir(f".\\OUT\\DRBool\\")
 
-    neg_fig, neg_ax = plt.subplots(dpi=150)
-    nan_fig, nan_ax = plt.subplots(dpi=150)
+    neg_fig, neg_ax = plt.subplots(dpi=300)
+    nan_fig, nan_ax = plt.subplots(dpi=300)
 
     for _ in range(len(cfg['APER_RADII'])):
         neg_ax.plot(cat['imag'], has_negatives[_], "r.", markersize=2)
