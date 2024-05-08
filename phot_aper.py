@@ -68,11 +68,11 @@ def _aper_phot_core(ff_list, cat, img_edge, aper_radii, out_dir):
         buff_flux = aperture_photometry(data, apertures)
 
         for apr_id in range(apr_num):
-            # buff_max = ApertureStats(data, apertures[apr_id]).max
-            raw_flux[apr_id][img_id] = buff_flux[f'aperture_sum_{apr_id}']
-            # raw_flux[apr_id][img_id] = np.where((bad_src_mask | (buff_max > 60000) |
-            #                                      (buff_flux[f'aperture_sum_{apr_id}'] < 0)),
-            #                                     np.nan, buff_flux[f'aperture_sum_{apr_id}'])
+            buff_max = ApertureStats(data, apertures[apr_id]).max
+            # raw_flux[apr_id][img_id] = buff_flux[f'aperture_sum_{apr_id}']
+            raw_flux[apr_id][img_id] = np.where((bad_src_mask | (buff_max > 60000) |
+                                                 (buff_flux[f'aperture_sum_{apr_id}'] < 0)),
+                                                np.nan, buff_flux[f'aperture_sum_{apr_id}'])
 
             raw_magn[apr_id][img_id] = -2.5 * np.log10(raw_flux[apr_id][img_id]) + 2.5 * np.log10(header['EXPTIME'])
             raw_merr[apr_id][img_id] = (1.0857 * np.sqrt(raw_flux[apr_id][img_id] * header['GAIN'] +
@@ -81,7 +81,7 @@ def _aper_phot_core(ff_list, cat, img_edge, aper_radii, out_dir):
                                         (raw_flux[apr_id][img_id] * header['GAIN']))
 
         if img_id == 0:
-            # _draw_sky_map(header, data, wcs, apertures[0], img_edge, out_dir)
+            _draw_sky_map(header, data, wcs, apertures[-1], img_edge, out_dir)
             print("Celestial map plotted")
 
         if img_id % 10 == 9 or img_id == img_num - 1:
@@ -166,7 +166,7 @@ def _aper_phot_altfull(mycat):
         stellar_phot = aperture_photometry(data, stellar_aper, method='exact')
 
         if counter == len(file_list) - 1:
-            _draw_sky_map(header, data, w, stellar_aper[0], 10, path_to_data)
+            _draw_sky_map(header, data, w, stellar_aper[-1], 10, path_to_data)
 
         for count, value in enumerate(aper_radii):
             flux = stellar_phot['aperture_sum_' + str(count)].value

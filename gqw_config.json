@@ -3,9 +3,10 @@
   "HC_CAT_PATH": ".\\M37 Cat\\table6.dat",
   "OUT_DIR": ".\\OUT\\",
 
-  "CAT_MAG_LIMIT": 19,
+  "CAT_RMAG_LIMIT": 17.5,
+  "CAT_IMAG_LIMIT": 17,
   "IMAGE_EDGE": 100,
-  "APER_RADII": [2, 3, 5],
+  "APER_RADII": [1.7, 2, 2.5],
 
   "ENS_INIT_SEARCH_R": 5,
   "ENS_MAX_SEARCH_R": 30,

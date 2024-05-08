@@ -8,8 +8,15 @@ def rm_plot_results(rb_magn, rb_merr, cat, cfg, prefix='unknw'):
     out_dir = f"{cfg['OUT_DIR']}{prefix}\\"
     check_out_dir(out_dir)
 
-    cat_magn = cat[cfg['CAT_FILTER_COLNAME']]
+    # cat_magn = cat[cfg['CAT_FILTER_COLNAME']]
+    cat_magn = cat['rmag']
     aper_radii = cfg['APER_RADII']
+
+    print(rb_magn.shape[1])
+
+    for _ in range(len(aper_radii)):
+        print(np.sum(np.isfinite(rb_magn[_]).any(axis=0)))
+        print(np.nanmedian(np.nanstd(rb_magn[_], axis=0)))
 
     _plot_magn(rb_magn, cat_magn, aper_radii, out_dir)
     _plot_std_magn(cat_magn, rb_magn, aper_radii, out_dir)
@@ -97,7 +104,7 @@ def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge, out_dir):
     dynr_min = scs_median - 1 * scs_std
 
     # Step 2: Prepare figure
-    fig, ax = plt.subplots(dpi=300, subplot_kw=dict(projection=img_wcs))
+    fig, ax = plt.subplots(dpi=450, subplot_kw=dict(projection=img_wcs))
 
     ax.set_xlim(img_edge, img_header['NAXIS2'] - img_edge)
     ax.set_ylim(img_edge, img_header['NAXIS1'] - img_edge)

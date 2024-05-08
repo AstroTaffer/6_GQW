@@ -3,16 +3,23 @@ from astropy.coordinates import SkyCoord
 import astropy.units as u
 
 
-def rm_sources_ensemble_photometry(raw_magn, raw_merr, cat, cfg):
-    clr_magn, clr_merr = _diff_phot_core(raw_magn, raw_merr, cat, cfg['APER_RADII'], cfg['CAT_FILTER_COLNAME'],
-                                         cfg['ENS_MAX_MAG_DIFF'], cfg['ENS_MAX_SIGMA_CRIT'])
-    # clr_magn, clr_merr = _diff_phot_oldcore(raw_magn, raw_merr, cat, cfg['APER_RADII'], cfg['CAT_FILTER_COLNAME'],
-    #                                         cfg['ENS_INIT_SEARCH_R'], cfg['ENS_MAX_SEARCH_R'],
-    #                                         cfg['ENS_MAX_MAG_DIFF'], cfg['ENS_MAX_SIGMA_CRIT'])
+def rm_sources_ensemble_photometry(raw_magn, raw_merr, cat, cfg, flt_cname, method):
+    match method:
+        case "smp":
+            clr_magn, clr_merr = _diff_phot_ak_simple_core(raw_magn, raw_merr, cat, cfg['APER_RADII'], flt_cname,
+                                                           cfg['ENS_MAX_MAG_DIFF'], cfg['ENS_MAX_SIGMA_CRIT'])
+        case "full":
+            clr_magn, clr_merr = _diff_phot_ak_full_core(raw_magn, raw_merr, cat, cfg['APER_RADII'], flt_cname,
+                                                         cfg['ENS_INIT_SEARCH_R'], cfg['ENS_MAX_SEARCH_R'],
+                                                         cfg['ENS_MAX_MAG_DIFF'], cfg['ENS_MAX_SIGMA_CRIT'])
+        case _:
+            clr_magn = None
+            clr_merr = None
+
     return clr_magn, clr_merr
 
 
-def _diff_phot_core(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_mmd, ens_msc):
+def _diff_phot_ak_simple_core(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_mmd, ens_msc):
     clr_magn = np.zeros_like(raw_magn)
     clr_merr = np.zeros_like(raw_magn)
     ens_corr = 0
@@ -79,7 +86,7 @@ def _diff_phot_core(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_mmd, en
     return clr_magn, clr_merr
 
 
-def _diff_phot_oldcore(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_isr, ens_msr, ens_mmd, ens_msc):
+def _diff_phot_ak_full_core(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_isr, ens_msr, ens_mmd, ens_msc):
     clr_magn = np.zeros_like(raw_magn)
     clr_merr = np.zeros_like(raw_magn)
     ens_corr = 0
@@ -163,7 +170,7 @@ def _diff_phot_oldcore(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_isr,
     return clr_magn, clr_merr
 
 
-def _diff_phot_fluxcore(raw_flux):
+def _diff_phot_alt_flux_core(raw_flux):
     clr_flux = np.zeros_like(raw_flux)
     clr_magn = np.zeros_like(clr_flux)
 

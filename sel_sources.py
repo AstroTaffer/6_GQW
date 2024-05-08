@@ -5,8 +5,8 @@ from astropy.table import Table
 from filesys_io import read_fits_file
 
 
-def rm_select_sources(ff_list, cfg, flt_cname):
-    cat = _read_hc_from_file(cfg['HC_CAT_PATH'], flt_cname, cfg['CAT_MAG_LIMIT'])
+def rm_select_sources(ff_list, cfg, flt_cname, mag_lim):
+    cat = _read_hc_from_file(cfg['HC_CAT_PATH'], flt_cname, mag_lim)
     cat = _sel_hc_sources_by_image_edges(cat, ff_list[0], cfg['IMAGE_EDGE'])
     print(f"{len(cat)} sources selected in {flt_cname}\n")
 
