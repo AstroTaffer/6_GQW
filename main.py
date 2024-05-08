@@ -20,21 +20,21 @@ i_ff_list = read_ff_list(f"{config['OUT_DIR']}i\\", prefix='i')
 
 
 # Step 3: Select sources
-# r_src_cat = rm_select_sources(r_ff_list, config, 'rmag')
-# i_src_cat = rm_select_sources(i_ff_list, config, 'imag')
+r_src_cat = rm_select_sources(r_ff_list, config, 'rmag')
+i_src_cat = rm_select_sources(i_ff_list, config, 'imag')
 # write_sel_src_cat(r_src_cat, f"{config['OUT_DIR']}r\\", prefix='r')
 # write_sel_src_cat(i_src_cat, f"{config['OUT_DIR']}i\\", prefix='i')
-r_src_cat = read_sel_src_cat(f"{config['OUT_DIR']}r\\", prefix='r')
-i_src_cat = read_sel_src_cat(f"{config['OUT_DIR']}i\\", prefix='i')
+# r_src_cat = read_sel_src_cat(f"{config['OUT_DIR']}r\\", prefix='r')
+# i_src_cat = read_sel_src_cat(f"{config['OUT_DIR']}i\\", prefix='i')
 
 
 # Step 4: Aperture photometry
-# r_raw_flux, r_raw_magn, r_raw_merr = rm_sources_aperture_photometry(r_ff_list, r_src_cat, config, prefix='r')
-# i_raw_flux, i_raw_magn, i_raw_merr = rm_sources_aperture_photometry(i_ff_list, i_src_cat, config, prefix='i')
+r_raw_flux, r_raw_magn, r_raw_merr = rm_sources_aperture_photometry(r_ff_list, r_src_cat, config, prefix='r')
+i_raw_flux, i_raw_magn, i_raw_merr = rm_sources_aperture_photometry(i_ff_list, i_src_cat, config, prefix='i')
 # write_phot_res(r_raw_flux, r_raw_magn, r_raw_merr, f"{config['OUT_DIR']}r\\", prefix='r_raw')
 # write_phot_res(i_raw_flux, i_raw_magn, i_raw_merr, f"{config['OUT_DIR']}i\\", prefix='i_raw')
-r_raw_flux, r_raw_magn, r_raw_merr = read_phot_res(f"{config['OUT_DIR']}r\\", prefix='r_raw')
-i_raw_flux, i_raw_magn, i_raw_merr = read_phot_res(f"{config['OUT_DIR']}i\\", prefix='i_raw')
+# r_raw_flux, r_raw_magn, r_raw_merr = read_phot_res(f"{config['OUT_DIR']}r\\", prefix='r_raw')
+# i_raw_flux, i_raw_magn, i_raw_merr = read_phot_res(f"{config['OUT_DIR']}i\\", prefix='i_raw')
 
 
 # Step 5: Ensemble photometry
@@ -53,6 +53,7 @@ i_raw_flux, i_raw_magn, i_raw_merr = read_phot_res(f"{config['OUT_DIR']}i\\", pr
 
 # Step -1: Debug
 pass
-# _bool__flux_debug(raw_flux, sources_catalog, config)
+_debug_bool_nans_and_negs(r_raw_flux, r_src_cat, config, prefix='r')
+_debug_bool_nans_and_negs(i_raw_flux, i_src_cat, config, prefix='i')
 # _extreme_debug_plotting(raw_flux, raw_magn, raw_merr, sources_catalog, config)
 # _aper_phot_altfull(sources_catalog)

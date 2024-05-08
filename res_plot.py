@@ -167,27 +167,27 @@ def _debug_extreme_ploting(flux, magn, merr, cat, cfg):
         merr_ax.cla()
 
 
-def _debug_bool_nans_and_negs(flux, cat, cfg):
+def _debug_bool_nans_and_negs(flux, cat, cfg, prefix='unknw'):
     has_negatives = (flux < 0).any(axis=1)
     has_nans = np.isnan(flux).any(axis=1)
 
-    check_out_dir(f".\\OUT\\DRBool\\")
+    check_out_dir(f".\\OUT\\{prefix}_debug\\")
 
     neg_fig, neg_ax = plt.subplots(dpi=300)
     nan_fig, nan_ax = plt.subplots(dpi=300)
 
     for _ in range(len(cfg['APER_RADII'])):
-        neg_ax.plot(cat['imag'], has_negatives[_], "r.", markersize=2)
-        nan_ax.plot(cat['imag'], has_nans[_], "r.", markersize=2)
+        neg_ax.plot(cat[f'{prefix}mag'], has_negatives[_], "r.", markersize=2)
+        nan_ax.plot(cat[f'{prefix}mag'], has_nans[_], "r.", markersize=2)
 
         neg_ax.set_ylabel("Has negatives")
-        neg_ax.set_xlabel("imag, m")
+        neg_ax.set_xlabel(f'{prefix}mag, m')
         neg_ax.grid()
         nan_ax.set_ylabel("Has NaNs")
-        nan_ax.set_xlabel("imag, m")
+        nan_ax.set_xlabel(f'{prefix}mag, m')
         nan_ax.grid()
 
-        neg_fig.savefig(f".\\OUT\\DRBool\\neg_{cfg['APER_RADII'][_]}.png")
+        neg_fig.savefig(f".\\OUT\\{prefix}_debug\\neg_{cfg['APER_RADII'][_]}.png")
         neg_ax.cla()
-        nan_fig.savefig(f".\\OUT\\DRBool\\nan_{cfg['APER_RADII'][_]}.png")
+        nan_fig.savefig(f".\\OUT\\{prefix}_debug\\nan_{cfg['APER_RADII'][_]}.png")
         nan_ax.cla()
