@@ -1,13 +1,14 @@
 import numpy as np
 from astropy.wcs import WCS
 from astropy.table import Table
+from regions import PixCoord
 
 from filesys_io import read_fits_file
 
 
 def rm_select_sources(ff_list, cfg, flt_cname, mag_lim):
     cat = _read_hc_from_file(cfg['HC_CAT_PATH'], flt_cname, mag_lim)
-    cat = _sel_hc_sources_by_image_edges(cat, ff_list[0], cfg['IMAGE_EDGE'])
+    cat = _sel_hc_sources(cat, ff_list[0], cfg['IMAGE_EDGE'], cfg['SRC_PROX_LIM'])
     print(f"{len(cat)} sources selected in {flt_cname}\n")
 
     return cat
@@ -41,7 +42,7 @@ def _read_hc_from_file(cat_path, cat_filter, cat_mag_lim):
     return cat
 
 
-def _sel_hc_sources_by_image_edges(cat, ff_name, img_edge):
+def _sel_hc_sources(cat, ff_name, img_edge, src_prox_lim):
     ff_header = read_fits_file(ff_name)[0]
     ff_wcs = WCS(ff_header)
 
@@ -51,5 +52,19 @@ def _sel_hc_sources_by_image_edges(cat, ff_name, img_edge):
                     (src_xy_coords[1] < img_edge) |
                     (src_xy_coords[1] > ff_header['NAXIS2'] - img_edge))
     cat.remove_rows(bad_src_mask)
+    src_xy_coords[0] = src_xy_coords[0][~bad_src_mask]
+    src_xy_coords[1] = src_xy_coords[1][~bad_src_mask]
+
+    src_num = len(cat)
+    src_pc = PixCoord(src_xy_coords[0], src_xy_coords[1])
+    src_is_close = np.zeros((src_num, src_num), dtype=bool)
+
+    for target_id in range(src_num):
+        src_sep = src_pc[target_id].separation(src_pc)
+        src_is_close[target_id] = src_sep < src_prox_lim
+        src_is_close[target_id, target_id] = False
+    src_is_close = src_is_close.any(axis=0)
+
+    cat.remove_rows(src_is_close)
 
     return cat

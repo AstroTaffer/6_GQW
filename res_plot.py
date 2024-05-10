@@ -32,30 +32,26 @@ def rm_plot_results(rb_magn, rb_merr, cat, cfg, flt_cname, prefix='unknw'):
 #  - plot color terms
 
 
-def _plot_magn(rb_magn, cat_magn, aper_radii, out_dir):
-    median_rb_magn = np.nanmedian(rb_magn, axis=1)
+def _plot_magn(mrb_magn, cat_magn, out_dir):
+    check_out_dir(out_dir)
 
     fig, ax = plt.subplots(dpi=300)
 
-    for _ in range(len(aper_radii)):
-        # y = median_rb_magn[_]
-        # fin_mask = np.isfinite(y)
-        # y = y[fin_mask]
-        #
-        # func = np.polyfit(cat_magn[fin_mask], y, 1)
-        # equ = np.poly1d(func)
-        #
-        # pts = np.linspace(np.min(cat_magn), np.max(cat_magn), num=100)
+    fin_mask = np.isfinite(mrb_magn)
 
-        ax.plot(cat_magn, median_rb_magn[_], 'k.', markersize=2)
-        # ax.plot(pts, func[0] * pts + func[1], 'r-', linewidth=1)
+    func = np.polyfit(cat_magn[fin_mask], mrb_magn[fin_mask], 1)
+    # equ = np.poly1d(func)
 
-        ax.set_xlabel(r'$m_{CAT}$, mag')
-        ax.set_ylabel(r'$\langle m_{RP} \rangle$, mag')
-        ax.grid()
+    pts = np.linspace(np.min(cat_magn), np.max(cat_magn), num=10)
 
-        fig.savefig(f'{out_dir}magn_{aper_radii[_]}.png')
-        ax.cla()
+    ax.plot(cat_magn, mrb_magn, 'k.', markersize=2)
+    ax.plot(pts, func[0] * pts + func[1], 'r-', linewidth=1)
+
+    # ax.set_xlabel(r'$m_{CAT}$, mag')
+    # ax.set_ylabel(r'$\langle m_{RP} \rangle$, mag')
+    ax.grid()
+
+    fig.savefig(f'{out_dir}magn_.png')
 
 
 def _plot_std_magn(cat_magn, rb_magn, aper_radii, out_dir):

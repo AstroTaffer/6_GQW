@@ -6,6 +6,7 @@
   "CAT_RMAG_LIMIT": 17.5,
   "CAT_IMAG_LIMIT": 17,
   "IMAGE_EDGE": 100,
+  "SRC_PROX_LIM": 8,
   "APER_RADII": [1.7, 2, 2.5],
 
   "ENS_INIT_SEARCH_R": 5,
