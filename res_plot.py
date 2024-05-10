@@ -4,15 +4,15 @@ from astropy.stats import sigma_clipped_stats
 from filesys_io import check_out_dir
 
 
-def rm_plot_results(rb_magn, rb_merr, cat, cfg, prefix='unknw'):
+def rm_plot_results(rb_magn, rb_merr, cat, cfg, flt_cname, prefix='unknw'):
     out_dir = f"{cfg['OUT_DIR']}{prefix}\\"
     check_out_dir(out_dir)
 
-    # cat_magn = cat[cfg['CAT_FILTER_COLNAME']]
-    cat_magn = cat['rmag']
+    cat_magn = cat[f'{flt_cname}']
     aper_radii = cfg['APER_RADII']
 
-    print(rb_magn.shape[1])
+    print(prefix)
+    print(rb_magn.shape[2])
 
     for _ in range(len(aper_radii)):
         print(np.sum(np.isfinite(rb_magn[_]).any(axis=0)))
@@ -38,10 +38,20 @@ def _plot_magn(rb_magn, cat_magn, aper_radii, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
     for _ in range(len(aper_radii)):
-        ax.plot(median_rb_magn[_], cat_magn, 'k.', markersize=2)
+        # y = median_rb_magn[_]
+        # fin_mask = np.isfinite(y)
+        # y = y[fin_mask]
+        #
+        # func = np.polyfit(cat_magn[fin_mask], y, 1)
+        # equ = np.poly1d(func)
+        #
+        # pts = np.linspace(np.min(cat_magn), np.max(cat_magn), num=100)
 
-        ax.set_xlabel(r'$\langle m_{RP} \rangle$, mag')
-        ax.set_ylabel(r'$m_{CAT}$, mag')
+        ax.plot(cat_magn, median_rb_magn[_], 'k.', markersize=2)
+        # ax.plot(pts, func[0] * pts + func[1], 'r-', linewidth=1)
+
+        ax.set_xlabel(r'$m_{CAT}$, mag')
+        ax.set_ylabel(r'$\langle m_{RP} \rangle$, mag')
         ax.grid()
 
         fig.savefig(f'{out_dir}magn_{aper_radii[_]}.png')
