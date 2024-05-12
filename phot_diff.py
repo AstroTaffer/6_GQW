@@ -19,7 +19,7 @@ def rm_sources_ensemble_photometry(raw_magn, raw_merr, cat, cfg, flt_cname, meth
     return clr_magn, clr_merr
 
 
-def _diff_phot_ak_simple_core(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens_mmd, ens_msc):
+def _diff_phot_ak_simple_core(raw_magn, raw_merr, cat, aper_radii, flt_cname, ens_mmd, ens_msc):
     clr_magn = np.zeros_like(raw_magn)
     clr_merr = np.zeros_like(raw_magn)
     ens_corr = 0
@@ -39,7 +39,7 @@ def _diff_phot_ak_simple_core(raw_magn, raw_merr, cat, aper_radii, cat_filter, e
                 clr_merr[apr_id, :, target_id] = np.nan
                 continue
 
-            src_mag_diff = np.abs(cat[cat_filter] - cat[cat_filter][target_id])
+            src_mag_diff = np.abs(cat[flt_cname] - cat[flt_cname][target_id])
 
             # Pick the sources that are:
             #   2. Not too bright or too dim

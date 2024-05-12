@@ -61,10 +61,9 @@ def _sel_hc_sources(cat, ff_name, img_edge, src_prox_lim):
 
     for target_id in range(src_num):
         src_sep = src_pc[target_id].separation(src_pc)
-        src_is_close[target_id] = src_sep < src_prox_lim
+        src_is_close[target_id] = src_sep <= src_prox_lim
         src_is_close[target_id, target_id] = False
     src_is_close = src_is_close.any(axis=0)
-
     cat.remove_rows(src_is_close)
 
     return cat

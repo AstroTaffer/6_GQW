@@ -18,12 +18,12 @@ def rm_sources_aperture_photometry(ff_list, cat, cfg, prefix='unknw'):
     warnings.simplefilter("ignore")
 
     raw_flux, raw_magn, raw_merr = _aper_phot_core(ff_list, cat, cfg['IMAGE_EDGE'] // 10,
-                                                   cfg['APER_RADII'], f"{cfg['OUT_DIR']}{prefix}\\{prefix}_")
+                                                   cfg['APER_RADII'], cfg['BEST_APER_ID'], f"{cfg['OUT_DIR']}{prefix}\\{prefix}_")
 
     return raw_flux, raw_magn, raw_merr
 
 
-def _aper_phot_core(ff_list, cat, img_edge, aper_radii, out_dir):
+def _aper_phot_core(ff_list, cat, img_edge, aper_radii, ba_id, out_dir):
     apr_num = len(aper_radii)
     img_num = len(ff_list)
     src_num = len(cat)
@@ -81,7 +81,7 @@ def _aper_phot_core(ff_list, cat, img_edge, aper_radii, out_dir):
                                         (raw_flux[apr_id][img_id] * header['GAIN']))
 
         if img_id == 0:
-            _draw_sky_map(header, data, wcs, apertures[-1], img_edge, out_dir)
+            _draw_sky_map(header, data, wcs, apertures[ba_id], img_edge, out_dir)
             print("Celestial map plotted")
 
         if img_id % 10 == 9 or img_id == img_num - 1:

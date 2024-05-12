@@ -4,86 +4,53 @@ from astropy.stats import sigma_clipped_stats
 from filesys_io import check_out_dir
 
 
-def rm_plot_results(rb_magn, rb_merr, cat, cfg, flt_cname, prefix='unknw'):
-    out_dir = f"{cfg['OUT_DIR']}{prefix}\\"
-    check_out_dir(out_dir)
-
-    cat_magn = cat[f'{flt_cname}']
-    aper_radii = cfg['APER_RADII']
-
-    print(prefix)
-    print(rb_magn.shape[2])
-
-    for _ in range(len(aper_radii)):
-        print(np.sum(np.isfinite(rb_magn[_]).any(axis=0)))
-        print(np.nanmedian(np.nanstd(rb_magn[_], axis=0)))
-
-    _plot_magn(rb_magn, cat_magn, aper_radii, out_dir)
-    _plot_std_magn(cat_magn, rb_magn, aper_radii, out_dir)
-    _plot_delta_magn(cat_magn, rb_magn, aper_radii, out_dir)
-    if rb_merr is not None:
-        _plot_merr(cat_magn, rb_merr, aper_radii, out_dir)
-
-# TODO:
-#  - round results
-#  - std vs mad_std
-#  - mean vs median and '<>'
-#  - .invert_yaxis()
-#  - plot color terms
-
-
-def _plot_magn(mrb_magn, cat_magn, out_dir):
-    check_out_dir(out_dir)
-
+def _plot_raw_magn(rb_magn, cat_magn, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    fin_mask = np.isfinite(mrb_magn)
+    ax.plot(rb_magn, cat_magn, 'k.', markersize=3)
 
-    func = np.polyfit(cat_magn[fin_mask], mrb_magn[fin_mask], 1)
-    # equ = np.poly1d(func)
-
-    pts = np.linspace(np.min(cat_magn), np.max(cat_magn), num=10)
-
-    ax.plot(cat_magn, mrb_magn, 'k.', markersize=2)
-    ax.plot(pts, func[0] * pts + func[1], 'r-', linewidth=1)
-
-    # ax.set_xlabel(r'$m_{CAT}$, mag')
-    # ax.set_ylabel(r'$\langle m_{RP} \rangle$, mag')
+    ax.set_xlabel(f"$\\langle m_{{{flt}RB}} \\rangle$ [mag]")
+    ax.set_ylabel(f"$m_{{{flt}CAT}}$ [mag]")
     ax.grid()
 
-    fig.savefig(f'{out_dir}magn_.png')
+    fig.savefig(f'{out_dir}{flt}\\{flt}_magn_raw.png')
 
 
-def _plot_std_magn(cat_magn, rb_magn, aper_radii, out_dir):
-    std_rb_magn = np.nanstd(rb_magn, axis=1)
-
+def _plot_fitted_magn(rb_magn, cat_magn, flt, out_dir, inliers_mask, fitted_line):
     fig, ax = plt.subplots(dpi=300)
 
-    for _ in range(len(aper_radii)):
-        ax.plot(cat_magn, std_rb_magn[_], 'k.', markersize=2)
+    ax.plot(rb_magn[inliers_mask], cat_magn[inliers_mask], 'k.', markersize=3, label="Fitted data")
+    ax.plot(rb_magn[~inliers_mask], cat_magn[~inliers_mask], 'r.', markersize=3, label="Clipped data")
 
-        ax.set_xlabel(r'$m_{CAT}$, mag')
-        ax.set_ylabel(r'$\langle \sigma_{m_{RP}} \rangle$, mag')
-        ax.grid()
+    rb_magn_lims = [np.min(rb_magn), np.max(rb_magn)]
+    ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'g-', label="Fitted model")
 
-        fig.savefig(f'{out_dir}std_{aper_radii[_]}.png')
-        ax.cla()
+    ax.set_xlabel(f"$\\langle m_{{{flt}RB}} \\rangle$ [mag]")
+    ax.set_ylabel(f"$m_{{{flt}CAT}}$ [mag]")
+    ax.grid()
+    ax.legend()
+
+    fig.savefig(f'{out_dir}{flt}\\{flt}_magn_fit.png')
 
 
-def _plot_delta_magn(cat_magn, rb_magn, aper_radii, out_dir):
-    delta_magn = np.nanmedian(rb_magn, axis=1) - cat_magn
-
+def _plot_std_magn(cat_magn, std_rb_magn, otw_magn, otw_std, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    for _ in range(len(aper_radii)):
-        ax.plot(cat_magn, delta_magn[_], 'k.', markersize=2)
+    ax.plot(cat_magn, std_rb_magn, 'k.', markersize=3, label="RB data")
+    ax.plot(otw_magn, otw_std, 'r.', markersize=3, label="1.2m data")
 
-        ax.set_xlabel(r'$m_{CAT}$, mag')
-        ax.set_ylabel(r'$\langle m_{RP} \rangle - m_{CAT}$, mag')
-        ax.grid()
+    ax.set_xlabel(f"$m_{{{flt}CAT}}$ [mag]")
+    ax.set_ylabel(f"$\\sigma( \\langle m_{{{flt}}} \\rangle )$ [mag]")
+    ax.grid()
+    ax.legend()
 
-        fig.savefig(f'{out_dir}delta_{aper_radii[_]}.png')
-        ax.cla()
+    fig.savefig(f'{out_dir}{flt}\\{flt}_std.png')
+
+
+
+
+
+
 
 
 def _plot_merr(cat_magn, rb_merr, aper_radii, out_dir):
