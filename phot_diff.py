@@ -4,6 +4,8 @@ import astropy.units as u
 
 
 def rm_sources_ensemble_photometry(raw_magn, raw_merr, cat, cfg, flt_cname, method):
+    print('')
+
     match method:
         case "smp":
             clr_magn, clr_merr = _diff_phot_ak_simple_core(raw_magn, raw_merr, cat, cfg['APER_RADII'], flt_cname,
@@ -171,6 +173,8 @@ def _diff_phot_ak_full_core(raw_magn, raw_merr, cat, aper_radii, cat_filter, ens
 
 
 def _diff_phot_alt_flux_core(raw_flux):
+    print('')
+
     clr_flux = np.zeros_like(raw_flux)
     clr_magn = np.zeros_like(clr_flux)
 

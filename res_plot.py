@@ -9,8 +9,8 @@ def _plot_raw_magn(rb_magn, cat_magn, flt, out_dir):
 
     ax.plot(rb_magn, cat_magn, 'k.', markersize=3)
 
-    ax.set_xlabel(f"$\\langle m_{{{flt}RB}} \\rangle$ [mag]")
-    ax.set_ylabel(f"$m_{{{flt}CAT}}$ [mag]")
+    ax.set_xlabel(f"$\\langle m_{{{flt}'RB}} \\rangle$ [mag]")
+    ax.set_ylabel(f"$m_{{{flt}'CAT}}$ [mag]")
     ax.grid()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_magn_raw.png')
@@ -25,48 +25,82 @@ def _plot_fitted_magn(rb_magn, cat_magn, flt, out_dir, inliers_mask, fitted_line
     rb_magn_lims = [np.min(rb_magn), np.max(rb_magn)]
     ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'g-', label="Fitted model")
 
-    ax.set_xlabel(f"$\\langle m_{{{flt}RB}} \\rangle$ [mag]")
-    ax.set_ylabel(f"$m_{{{flt}CAT}}$ [mag]")
+    ax.set_xlabel(f"$\\langle m_{{{flt}'RB}} \\rangle$ [mag]")
+    ax.set_ylabel(f"$m_{{{flt}'CAT}}$ [mag]")
     ax.grid()
     ax.legend()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_magn_fit.png')
 
 
-def _plot_std_magn(cat_magn, std_rb_magn, otw_magn, otw_std, flt, out_dir):
+def _plot_std_magn(cat_magn, rb_magn_std, otw_magn, otw_std, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(cat_magn, std_rb_magn, 'k.', markersize=3, label="RB data")
-    ax.plot(otw_magn, otw_std, 'r.', markersize=3, label="1.2m data")
+    ax.plot(cat_magn, rb_magn_std, 'k.', markersize=3, label="RoboPhot data, EXPTIME = 80 s")
+    ax.plot(otw_magn, otw_std, 'r.', markersize=3, label="1.2m data, EXPTIME = 90 s")
 
-    ax.set_xlabel(f"$m_{{{flt}CAT}}$ [mag]")
-    ax.set_ylabel(f"$\\sigma( \\langle m_{{{flt}}} \\rangle )$ [mag]")
+    ax.set_xlabel(f"$m_{{{flt}'CAT}}$ [mag]")
+    ax.set_ylabel(f"$\\sigma( \\langle m_{{{flt}'}} \\rangle )$ [mag]")
     ax.grid()
     ax.legend()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_std.png')
 
 
-
-
-
-
-
-
-def _plot_merr(cat_magn, rb_merr, aper_radii, out_dir):
-    median_rb_merr = np.nanmedian(rb_merr, axis=1)
-
+def _plot_merr(cat_magn, rb_merr, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    for _ in range(len(aper_radii)):
-        ax.plot(cat_magn, median_rb_merr[_], 'k.', markersize=2)
+    ax.plot(cat_magn, rb_merr, 'k.', markersize=3)
 
-        ax.set_xlabel(r'$m_{CAT}$, mag')
-        ax.set_ylabel(r'$\langle m_{err_{RP}} \rangle$, mag')
-        ax.grid()
+    ax.set_xlabel(f"$m_{{{flt}'CAT}}$ [mag]")
+    ax.set_ylabel(f"$\\langle merr_{{{flt}'RB}} \\rangle$ [mag]")
+    ax.grid()
 
-        fig.savefig(f'{out_dir}merr_{aper_radii[_]}.png')
-        ax.cla()
+    fig.savefig(f'{out_dir}{flt}\\{flt}_merr.png')
+
+
+def _plot_total_throughput(cat_magn, total_tp, flt, out_dir):
+    fig, ax = plt.subplots(dpi=300)
+
+    ax.plot(cat_magn, total_tp, 'k.', markersize=3)
+
+    ax.set_xlabel(f"$m_{{{flt}'CAT}}$ [mag]")
+    ax.set_ylabel(f"TP [%]")
+    ax.grid()
+
+    fig.savefig(f'{out_dir}{flt}\\{flt}_tp.png')
+
+
+def _plot_color_term(cat_color, delta_magn, flt, out_dir, fitted_line):
+    fig, ax = plt.subplots(dpi=300)
+
+    ax.plot(cat_color, delta_magn, 'k.', markersize=3, label="Data")
+
+    rb_magn_lims = [np.min(cat_color), np.max(cat_color)]
+    ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'r-', label="Fitted model")
+
+    ax.set_xlabel(r"$m_{r'CAT} - m_{i'CAT}$ [mag]")
+    ax.set_ylabel(f"$m_{{{flt}'CAT}} - \\langle m_{{{flt}'RB}} \\rangle$ [mag]")
+    ax.grid()
+    ax.legend()
+
+    fig.savefig(f'{out_dir}{flt}\\{flt}_color_term.png')
+
+
+def _plot_alt_color_term(cat_color, rb_color, out_dir, fitted_line):
+    fig, ax = plt.subplots(dpi=300)
+
+    ax.plot(cat_color, rb_color, 'k.', markersize=3, label="Data")
+
+    rb_magn_lims = [np.min(cat_color), np.max(cat_color)]
+    ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'r-', label="Fitted model")
+
+    ax.set_xlabel(r"$m_{r'CAT} - m_{i'CAT}$ [mag]")
+    ax.set_ylabel(r"$m_{r'RB} - m_{i'RB}$ [mag]")
+    ax.grid()
+    ax.legend()
+
+    fig.savefig(f'{out_dir}alt_color_term.png')
 
 
 def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge, out_dir):

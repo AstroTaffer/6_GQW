@@ -9,7 +9,7 @@ from filesys_io import read_fits_file
 def rm_select_sources(ff_list, cfg, flt_cname, mag_lim):
     cat = _read_hc_from_file(cfg['HC_CAT_PATH'], flt_cname, mag_lim)
     cat = _sel_hc_sources(cat, ff_list[0], cfg['IMAGE_EDGE'], cfg['SRC_PROX_LIM'])
-    print(f"{len(cat)} sources selected in {flt_cname}\n")
+    print(f"{len(cat)} sources selected in {flt_cname}")
 
     return cat
 

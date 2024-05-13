@@ -16,6 +16,7 @@ from res_plot import _draw_sky_map
 
 def rm_sources_aperture_photometry(ff_list, cat, cfg, prefix='unknw'):
     warnings.simplefilter("ignore")
+    print('')
 
     raw_flux, raw_magn, raw_merr = _aper_phot_core(ff_list, cat, cfg['IMAGE_EDGE'] // 10,
                                                    cfg['APER_RADII'], cfg['BEST_APER_ID'], f"{cfg['OUT_DIR']}{prefix}\\{prefix}_")
