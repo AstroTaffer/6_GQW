@@ -13,34 +13,37 @@ def rm_get_results(flux, magn, merr, cat, cfg, flt_cname):
 
     flux, magn, merr, cat = _select_any_finite_ba_slice(flux, magn, merr, cat, cfg['BEST_APER_ID'])
 
-    inliers_mask = _get_sigma_clip_mask(magn, cat, flt_cname, out_dir)
-    flux, magn, merr, cat = _select_inliers(flux, magn, merr, cat, inliers_mask)
+    fitted_line,inliers_mask = _get_sigma_clip_mask(magn, cat, flt_cname, out_dir)
 
-    _calc_magn_std(magn, cat, flt_cname, out_dir)
+    flux, magn, merr, cat = _select_inliers(flux, magn, merr, cat, inliers_mask)
+    clc_magn = fitted_line(magn)
+
+    _calc_magn_std(clc_magn, flt_cname, out_dir)
 
     if merr is not None:
-        _calc_merr(merr, cat, flt_cname, out_dir)
+        _calc_merr(clc_magn, merr, flt_cname, out_dir)
 
     if flux is None:
         flux = 80 * np.power(10.0, -0.4 * magn)
-    _calc_total_throughput(flux, cat, flt_cname, out_dir)
+    _calc_total_throughput(clc_magn, flux, flt_cname, out_dir)
 
-    return magn, cat
+    return clc_magn, cat
 
 
-def rm_get_color_terms(r_rb_magn, i_rb_magn, r_cat, i_cat, cfg):
+def rm_get_color_terms(r_clc_magn, i_clc_magn, r_cat, i_cat, cfg):
+    print('')
     out_dir = cfg['OUT_DIR']
 
     inter, r_ids, i_ids = np.intersect1d(r_cat['ID'], i_cat['ID'], return_indices=True)
 
-    r_rb_magn_med = np.nanmedian(r_rb_magn[:, r_ids], axis=0)
-    i_rb_magn_med = np.nanmedian(i_rb_magn[:, i_ids], axis=0)
+    r_clc_magn_med = np.nanmedian(r_clc_magn[:, r_ids], axis=0)
+    i_clc_magn_med = np.nanmedian(i_clc_magn[:, i_ids], axis=0)
     cat = r_cat[r_ids]
 
     # TODO: Color = delta_RB or delta_CAT?
     cat_color = cat['rmag'] - cat['imag']
-    r_mag_delta = cat['rmag'] - r_rb_magn_med
-    i_mag_delta = cat['imag'] - i_rb_magn_med
+    r_mag_delta = cat['rmag'] - r_clc_magn_med
+    i_mag_delta = cat['imag'] - i_clc_magn_med
 
     lin_fit = LinearLSQFitter()
     r_fitted_line = lin_fit(Linear1D(), cat_color, r_mag_delta)
@@ -51,12 +54,12 @@ def rm_get_color_terms(r_rb_magn, i_rb_magn, r_cat, i_cat, cfg):
     _plot_color_term(cat_color, r_mag_delta, 'r', out_dir, r_fitted_line)
     _plot_color_term(cat_color, i_mag_delta, 'i', out_dir, i_fitted_line)
 
-    rb_color = r_rb_magn_med - i_rb_magn_med
+    clc_color = r_clc_magn_med - i_clc_magn_med
 
-    alt_fitted_line = lin_fit(Linear1D(), cat_color, rb_color)
+    alt_fitted_line = lin_fit(Linear1D(), cat_color, clc_color)
     print(f"alt color parameters {alt_fitted_line.parameters}")
 
-    _plot_alt_color_term(cat_color, rb_color, out_dir, alt_fitted_line)
+    _plot_alt_color_term(cat_color, clc_color, out_dir, alt_fitted_line)
 
 
 def _select_any_finite_ba_slice(flux, magn, merr, cat, ba_id):
@@ -99,7 +102,7 @@ def _get_sigma_clip_mask(rb_magn, cat, flt_cname, out_dir):
     _plot_fitted_magn(rb_magn_med, cat_magn, flt_cname[0], out_dir, inliers_mask, fitted_line)
     print(f"{np.sum(inliers_mask)} stars, {sc_fit.fit_info['niter']} iterations, parameters {fitted_line.parameters}")
 
-    return inliers_mask
+    return fitted_line, inliers_mask
 
 
 def _select_inliers(flux, magn, merr, cat, inliers_mask):
@@ -114,26 +117,26 @@ def _select_inliers(flux, magn, merr, cat, inliers_mask):
     return flux, magn, merr, cat
 
 
-def _calc_magn_std(rb_magn, cat, flt_cname, out_dir):
-    rb_magn_std = np.nanstd(rb_magn, axis=0)
-    cat_magn = cat[flt_cname]
+def _calc_magn_std(clc_magn, flt_cname, out_dir):
+    clc_magn_med = np.nanmedian(clc_magn, axis=0)
+    clc_magn_std = np.nanstd(clc_magn, axis=0)
 
     otw_data = np.loadtxt(f"{out_dir}1.2M_errors_{flt_cname[0]}.txt")
     otw_magn = otw_data[:, 0]
     otw_std = otw_data[:, 1]
 
-    _plot_std_magn(cat_magn, rb_magn_std, otw_magn, otw_std, flt_cname[0], out_dir)
+    _plot_std_magn(clc_magn_med, clc_magn_std, otw_magn, otw_std, flt_cname[0], out_dir)
 
 
-def _calc_merr(rb_merr, cat, flt_cname, out_dir):
+def _calc_merr(clc_magn, rb_merr, flt_cname, out_dir):
+    clc_magn_med = np.nanmedian(clc_magn, axis=0)
     rb_merr_med = np.nanmedian(rb_merr, axis=0)
-    cat_magn = cat[flt_cname]
 
-    _plot_merr(cat_magn, rb_merr_med, flt_cname[0], out_dir)
+    _plot_merr(clc_magn_med, rb_merr_med, flt_cname[0], out_dir)
 
 
-def _calc_total_throughput(rb_flux, cat, flt_cname, out_dir):
+def _calc_total_throughput(clc_magn, rb_flux, flt_cname, out_dir):
+    clc_magn_med = np.nanmedian(clc_magn, axis=0)
     rb_flux_med = np.nanmedian(rb_flux, axis=0)
-    cat_magn = cat[flt_cname]
 
     # TODO: Calc tp [%]

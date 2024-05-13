@@ -33,38 +33,38 @@ def _plot_fitted_magn(rb_magn, cat_magn, flt, out_dir, inliers_mask, fitted_line
     fig.savefig(f'{out_dir}{flt}\\{flt}_magn_fit.png')
 
 
-def _plot_std_magn(cat_magn, rb_magn_std, otw_magn, otw_std, flt, out_dir):
+def _plot_std_magn(clc_magn_med, clc_magn_std, otw_magn, otw_std, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(cat_magn, rb_magn_std, 'k.', markersize=3, label="RoboPhot data, EXPTIME = 80 s")
+    ax.plot(clc_magn_med, clc_magn_std, 'k.', markersize=3, label="RoboPhot data, EXPTIME = 80 s")
     ax.plot(otw_magn, otw_std, 'r.', markersize=3, label="1.2m data, EXPTIME = 90 s")
 
-    ax.set_xlabel(f"$m_{{{flt}'CAT}}$ [mag]")
-    ax.set_ylabel(f"$\\sigma( \\langle m_{{{flt}'}} \\rangle )$ [mag]")
+    ax.set_xlabel(f"$\\langle m_{{{flt}'CLC}} \\rangle$ [mag]")
+    ax.set_ylabel(f"$\\sigma( \\langle m_{{{flt}'CLC}} \\rangle )$ [mag]")
     ax.grid()
     ax.legend()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_std.png')
 
 
-def _plot_merr(cat_magn, rb_merr, flt, out_dir):
+def _plot_merr(clc_magn_med, rb_merr_med, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(cat_magn, rb_merr, 'k.', markersize=3)
+    ax.plot(clc_magn_med, rb_merr_med, 'k.', markersize=3)
 
-    ax.set_xlabel(f"$m_{{{flt}'CAT}}$ [mag]")
+    ax.set_xlabel(f"$\\langle m_{{{flt}'CLC}} \\rangle$ [mag]")
     ax.set_ylabel(f"$\\langle merr_{{{flt}'RB}} \\rangle$ [mag]")
     ax.grid()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_merr.png')
 
 
-def _plot_total_throughput(cat_magn, total_tp, flt, out_dir):
+def _plot_total_throughput(clc_magn_med, total_tp, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(cat_magn, total_tp, 'k.', markersize=3)
+    ax.plot(clc_magn_med, total_tp, 'k.', markersize=3)
 
-    ax.set_xlabel(f"$m_{{{flt}'CAT}}$ [mag]")
+    ax.set_xlabel(f"$\\langle m_{{{flt}'CLC}} \\rangle$ [mag]")
     ax.set_ylabel(f"TP [%]")
     ax.grid()
 
@@ -80,23 +80,23 @@ def _plot_color_term(cat_color, delta_magn, flt, out_dir, fitted_line):
     ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'r-', label="Fitted model")
 
     ax.set_xlabel(r"$m_{r'CAT} - m_{i'CAT}$ [mag]")
-    ax.set_ylabel(f"$m_{{{flt}'CAT}} - \\langle m_{{{flt}'RB}} \\rangle$ [mag]")
+    ax.set_ylabel(f"$m_{{{flt}'CAT}} - \\langle m_{{{flt}'CLC}} \\rangle$ [mag]")
     ax.grid()
     ax.legend()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_color_term.png')
 
 
-def _plot_alt_color_term(cat_color, rb_color, out_dir, fitted_line):
+def _plot_alt_color_term(cat_color, clc_color, out_dir, fitted_line):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(cat_color, rb_color, 'k.', markersize=3, label="Data")
+    ax.plot(cat_color, clc_color, 'k.', markersize=3, label="Data")
 
     rb_magn_lims = [np.min(cat_color), np.max(cat_color)]
     ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'r-', label="Fitted model")
 
     ax.set_xlabel(r"$m_{r'CAT} - m_{i'CAT}$ [mag]")
-    ax.set_ylabel(r"$m_{r'RB} - m_{i'RB}$ [mag]")
+    ax.set_ylabel(r"$\langle m_{r'CLC} \rangle - \langle m_{i'CLC} \rangle$ [mag]")
     ax.grid()
     ax.legend()
 
