@@ -68,10 +68,41 @@ i_full_flux, i_full_magn, i_full_merr = read_phot_res(f"{config['OUT_DIR']}i\\",
 
 
 # Step 6: Fit and plot results
-r_sel_magn, r_sel_cat = rm_get_results(r_full_flux, r_full_magn, r_full_merr, r_src_cat, config, 'rmag')
-i_sel_magn, i_sel_cat = rm_get_results(i_full_flux, i_full_magn, i_full_merr, i_src_cat, config, 'imag')
+finite_mask_r = np.isfinite(r_full_magn[-1]).any(axis=0)
+finite_mask_i = np.isfinite(i_full_magn[-1]).any(axis=0)
+r_full_magn = r_full_magn[:, :, finite_mask_r]
+i_full_magn = i_full_magn[:, :, finite_mask_i]
+r_src_cat = r_src_cat[finite_mask_r]
+i_src_cat = i_src_cat[finite_mask_i]
+
+inter, r_ids, i_ids = np.intersect1d(r_src_cat['ID'], i_src_cat['ID'], return_indices=True)
+r_full_magn = r_full_magn[:, :, r_ids]
+i_full_magn = i_full_magn[:, :, i_ids]
+cat = r_src_cat[r_ids]
+
+r_clc_magn_med = np.nanmedian(r_full_magn[-1], axis=0)
+i_clc_magn_med = np.nanmedian(i_full_magn[-1], axis=0)
+rb_color = r_clc_magn_med - i_clc_magn_med
+
+a = 0.035 * (0.21 - rb_color)
+b = 0.041 * (0.21 - rb_color)
+cat['rmag'] = cat['rmag'] + 0.035 * (0.21 - rb_color)
+cat['imag'] = cat['imag'] + 0.041 * (0.21 - rb_color)
+
+
+r_sel_magn, r_sel_cat = rm_get_results(None, r_full_magn, None, cat, config, 'rmag')
+i_sel_magn, i_sel_cat = rm_get_results(None, i_full_magn, None, cat, config, 'imag')
 rm_get_color_terms(r_sel_magn, i_sel_magn, r_sel_cat, i_sel_cat, config)
 
 
 # Step -1: Debug
+# 804 finite stars in aperture slice [-1]
+# 743 stars, 3 iterations, parameters [ 0.98434301 20.97460636]
+#
+# 804 finite stars in aperture slice [-1]
+# 730 stars, 3 iterations, parameters [ 0.98843148 20.65572853]
+#
+# rmag color parameters [-0.01570409  0.00314885]
+# imag color parameters [-0.10649912  0.02881444]
+# alt color parameters [0.90920497 0.02566559]
 pass
