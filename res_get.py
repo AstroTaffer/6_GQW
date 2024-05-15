@@ -2,9 +2,10 @@ import numpy as np
 from astropy.stats import sigma_clip
 from astropy.modeling.fitting import LinearLSQFitter, FittingWithOutlierRemoval
 from astropy.modeling.models import Linear1D
+import matplotlib.pyplot as plt
 
-from res_plot import (_plot_raw_magn, _plot_fitted_magn, _plot_std_magn, _plot_merr,
-                      _plot_color_term, _plot_alt_color_term)
+from res_plot import (_plot_raw_magn, _plot_fitted_magn, _plot_std_magn, _plot_merr, _plot_delta_magn, _plot_check_magn,
+                      _plot_total_throughput, _plot_color_term, _plot_alt_color_term)
 
 
 def rm_get_results(flux, magn, merr, cat, cfg, flt_cname):
@@ -13,19 +14,20 @@ def rm_get_results(flux, magn, merr, cat, cfg, flt_cname):
 
     flux, magn, merr, cat = _select_any_finite_ba_slice(flux, magn, merr, cat, cfg['BEST_APER_ID'])
 
-    fitted_line,inliers_mask = _get_sigma_clip_mask(magn, cat, flt_cname, out_dir)
+    fitted_line, inliers_mask = _get_sigma_clip_mask(magn, cat, flt_cname, out_dir)
 
     flux, magn, merr, cat = _select_inliers(flux, magn, merr, cat, inliers_mask)
     clc_magn = fitted_line(magn)
 
-    _calc_magn_std(clc_magn, flt_cname, out_dir)
+    # _calc_magn_delta(magn, clc_magn, cat, flt_cname, out_dir)
+    # _calc_magn_std(clc_magn, flt_cname, out_dir)
 
-    if merr is not None:
-        _calc_merr(clc_magn, merr, flt_cname, out_dir)
+    # if merr is not None:
+    #     _calc_merr(clc_magn, merr, flt_cname, out_dir)
 
-    if flux is None:
-        flux = 80 * np.power(10.0, -0.4 * magn)
-    _calc_total_throughput(clc_magn, flux, flt_cname, out_dir)
+    # if flux is None:
+    #     flux = 80 * np.power(10.0, -0.4 * magn)
+    # _calc_total_throughput(clc_magn, flux, cat, flt_cname, out_dir)
 
     return clc_magn, cat
 
@@ -46,13 +48,15 @@ def rm_get_color_terms(r_clc_magn, i_clc_magn, r_cat, i_cat, cfg):
     i_mag_delta = cat['imag'] - i_clc_magn_med
 
     lin_fit = LinearLSQFitter()
-    r_fitted_line = lin_fit(Linear1D(), cat_color, r_mag_delta)
-    i_fitted_line = lin_fit(Linear1D(), cat_color, i_mag_delta)
-    print(f"rmag color parameters {r_fitted_line.parameters}")
-    print(f"imag color parameters {i_fitted_line.parameters}")
+    # r_fitted_line = lin_fit(Linear1D(), cat_color, r_mag_delta)
+    # i_fitted_line = lin_fit(Linear1D(), cat_color, i_mag_delta)
+    # print(f"rmag color parameters {r_fitted_line.parameters}")
+    # print(f"imag color parameters {i_fitted_line.parameters}")
 
-    _plot_color_term(cat_color, r_mag_delta, 'r', out_dir, r_fitted_line)
-    _plot_color_term(cat_color, i_mag_delta, 'i', out_dir, i_fitted_line)
+    # _plot_color_term(cat_color, r_mag_delta, 'r', out_dir, r_fitted_line)
+    # _plot_color_term(cat_color, i_mag_delta, 'i', out_dir, i_fitted_line)
+    _plot_color_term(cat_color, r_mag_delta, 'r', out_dir)
+    _plot_color_term(cat_color, i_mag_delta, 'i', out_dir)
 
     clc_color = r_clc_magn_med - i_clc_magn_med
 
@@ -91,15 +95,15 @@ def _get_sigma_clip_mask(rb_magn, cat, flt_cname, out_dir):
     rb_magn_med = np.nanmedian(rb_magn, axis=0)
     cat_magn = cat[flt_cname]
 
-    _plot_raw_magn(rb_magn_med, cat_magn, flt_cname[0], out_dir)
+    # _plot_raw_magn(rb_magn_med, cat_magn, flt_cname[0], out_dir)
 
     # noinspection PyTypeChecker
     sc_fit = FittingWithOutlierRemoval(LinearLSQFitter(), sigma_clip, niter=5, sigma=3.0)
-    fitted_line, inliers_mask = sc_fit(Linear1D(), rb_magn_med, cat_magn)
-    inliers_mask = np.invert(inliers_mask)
+    fitted_line, outliers_mask = sc_fit(Linear1D(), rb_magn_med, cat_magn)
+    inliers_mask = np.invert(outliers_mask)
 
     # TODO: Round fitted parameters and plot 1\sigma uncertainty
-    _plot_fitted_magn(rb_magn_med, cat_magn, flt_cname[0], out_dir, inliers_mask, fitted_line)
+    # _plot_fitted_magn(rb_magn_med, cat_magn, flt_cname[0], out_dir, inliers_mask, fitted_line)
     print(f"{np.sum(inliers_mask)} stars, {sc_fit.fit_info['niter']} iterations, parameters {fitted_line.parameters}")
 
     return fitted_line, inliers_mask
@@ -115,6 +119,18 @@ def _select_inliers(flux, magn, merr, cat, inliers_mask):
     cat = cat[inliers_mask]
 
     return flux, magn, merr, cat
+
+
+def _calc_magn_delta(rb_magn, clc_magn, cat, flt_cname, out_dir):
+    rb_magn_med = np.nanmedian(rb_magn, axis=0)
+    clc_magn_med = np.nanmedian(clc_magn, axis=0)
+    cat_magn = cat[flt_cname]
+
+    magn_delta = cat_magn - clc_magn_med
+    print(f"std(delta) in {flt_cname} {np.std(magn_delta)}")
+
+    _plot_delta_magn(rb_magn_med, magn_delta, flt_cname[0], out_dir)
+    _plot_check_magn(clc_magn_med, cat_magn, flt_cname[0], out_dir)
 
 
 def _calc_magn_std(clc_magn, flt_cname, out_dir):
@@ -135,8 +151,24 @@ def _calc_merr(clc_magn, rb_merr, flt_cname, out_dir):
     _plot_merr(clc_magn_med, rb_merr_med, flt_cname[0], out_dir)
 
 
-def _calc_total_throughput(clc_magn, rb_flux, flt_cname, out_dir):
+def _calc_total_throughput(clc_magn, rb_flux, cat, flt_cname, out_dir):
     clc_magn_med = np.nanmedian(clc_magn, axis=0)
     rb_flux_med = np.nanmedian(rb_flux, axis=0)
 
-    # TODO: Calc tp [%]
+    # flux [phot] = F_nu0 * 10^(-0.4 * m) / h * ln(lambda_max / lambda_min) * S * t * SIGNAL(RAper = 1 * FWHM) / GAIN
+    # We collect ~65% of light at RAper = 1 * FWHM
+    match flt_cname:
+        case 'rmag':
+            cat_flux = 4490 * np.power(10, -0.4 * cat[flt_cname]) * 1.51e7 * 0.14 * np.pi * 0.3 * 0.3 * 80 * 0.65 / 1.4
+            # cat_flux = (3631 / 1e23 * np.power(10, -0.4 * cat[flt_cname]) / (6.62607015 / 1e27) *
+            #             np.log(7176.14 / 5409.03) * np.pi * 900 * 80 * 0.65 / 1.4)
+        case 'imag':
+            cat_flux = 4760 * np.power(10, -0.4 * cat[flt_cname]) * 1.51e7 * 0.16 * np.pi * 0.3 * 0.3 * 80 * 0.65 / 1.4
+            # cat_flux = (3631 / 1e23 * np.power(10, -0.4 * cat[flt_cname]) / (6.62607015 / 1e27) *
+            #             np.log(8730.62 / 6728.44) * np.pi * 900 * 80 * 0.65 / 1.4)
+        case _:
+            cat_flux = np.nan
+
+    total_tp = rb_flux_med / cat_flux * 100
+    _plot_total_throughput(clc_magn_med, total_tp, flt_cname[0], out_dir)
+    print(f"TP in {flt_cname} {np.median(total_tp)} +/- {np.std(total_tp)} %")
