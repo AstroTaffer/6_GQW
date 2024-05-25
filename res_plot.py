@@ -19,11 +19,11 @@ def _plot_raw_magn(rb_magn, cat_magn, flt, out_dir):
 def _plot_fitted_magn(rb_magn, cat_magn, flt, out_dir, inliers_mask, fitted_line):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(rb_magn[inliers_mask], cat_magn[inliers_mask], 'k.', markersize=3, label="Fitted data")
-    ax.plot(rb_magn[~inliers_mask], cat_magn[~inliers_mask], 'r.', markersize=3, label="Clipped data")
+    ax.plot(rb_magn[inliers_mask], cat_magn[inliers_mask], 'k.', markersize=3, label="Оставшиеся звезды")
+    ax.plot(rb_magn[~inliers_mask], cat_magn[~inliers_mask], 'r.', markersize=3, label="Исключенные звезды")
 
     rb_magn_lims = [np.min(rb_magn), np.max(rb_magn)]
-    ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'g-', label="Fitted model")
+    ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'g-', label="Итоговая модель")
 
     ax.set_xlabel(f"$m_{{{flt}'}}$ [mag]")
     ax.set_ylabel(f"$M_{{{flt}'}}$ [mag]")
@@ -33,14 +33,27 @@ def _plot_fitted_magn(rb_magn, cat_magn, flt, out_dir, inliers_mask, fitted_line
     fig.savefig(f'{out_dir}{flt}\\{flt}_magn_fit.png')
 
 
-def _plot_delta_magn(rb_magn, magn_delta, flt, out_dir):
+def _plot_delta_magn(cat_magn, magn_delta, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(rb_magn, magn_delta, 'k.', markersize=3)
+    ax.plot(cat_magn, magn_delta, 'k.', markersize=3, label="Данные")
 
-    ax.set_xlabel(f"$m_{{{flt}'}}$ [mag]")
+    # HACK: Quick implementation
+    n_bins = 10
+    n_bdots = np.histogram(cat_magn, bins=n_bins)[0]
+    s_bdots = np.histogram(cat_magn, bins=n_bins, weights=magn_delta)[0]
+    ss_bdots, _ = np.histogram(cat_magn, bins=n_bins, weights=magn_delta * magn_delta)
+    mean_bdots = s_bdots / n_bdots
+    std_bdots = np.sqrt(ss_bdots / n_bdots - mean_bdots * mean_bdots)
+
+    ax.errorbar((_[1:] + _[:-1]) / 2, mean_bdots, yerr=std_bdots, fmt='r.', markersize=5, label="Бинированные данные")
+    print(f"delta mean in {flt} {mean_bdots}")
+    print(f"delta std in {flt} {std_bdots}")
+
+    ax.set_xlabel(f"$M_{{{flt}'}}$ [mag]")
     ax.set_ylabel(f"$M_{{{flt}'}} - M'_{{{flt}'}}$ [mag]")
     ax.grid()
+    ax.legend()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_delta.png')
 
@@ -57,18 +70,22 @@ def _plot_check_magn(clc_magn_med, cat_magn, flt, out_dir):
     fig.savefig(f'{out_dir}{flt}\\{flt}_check.png')
 
 
-def _plot_std_magn(clc_magn_med, clc_magn_std, otw_magn, otw_std, flt, out_dir):
+def _plot_std_magn(cat_magn, rb_magn_std, otw_magn, otw_std, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(clc_magn_med, clc_magn_std, 'k.', markersize=3, label="RoboPhot data, EXPTIME = 80 s")
-    ax.plot(otw_magn, otw_std, 'r.', markersize=3, label="1.2m data, EXPTIME = 90 s")
+    ax.plot(cat_magn, rb_magn_std, 'k.', markersize=3, label="RoboPhot, EXPTIME = 80 сек")
+    ax.plot(otw_magn, otw_std, 'r.', markersize=3, label="1.2-м, EXPTIME = 90 сек")
 
-    ax.set_xlabel(f"$\\langle m_{{{flt}'CLC}} \\rangle$ [mag]")
-    ax.set_ylabel(f"$\\sigma( \\langle m_{{{flt}'CLC}} \\rangle )$ [mag]")
+    ax.set_xlabel(f"$M_{{{flt}'}}$ [mag]")
+    ax.set_ylabel(f"$\\sigma(m_{{{flt}'}})$ [mag]")
     ax.grid()
     ax.legend()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_std.png')
+
+    ax.set_ylim(0, 0.05)
+
+    fig.savefig(f'{out_dir}{flt}\\{flt}_std_zoom.png')
 
 
 def _plot_merr(clc_magn_med, rb_merr_med, flt, out_dir):
@@ -83,47 +100,47 @@ def _plot_merr(clc_magn_med, rb_merr_med, flt, out_dir):
     fig.savefig(f'{out_dir}{flt}\\{flt}_merr.png')
 
 
-def _plot_total_throughput(clc_magn_med, total_tp, flt, out_dir):
+def _plot_total_throughput(cat_magn, total_tp, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(clc_magn_med, total_tp, 'k.', markersize=3)
+    ax.plot(cat_magn, total_tp, 'k.', markersize=3)
 
-    ax.set_xlabel(f"$\\langle m_{{{flt}'CLC}} \\rangle$ [mag]")
+    ax.set_xlabel(f"$M_{{{flt}'}}$ [mag]")
     ax.set_ylabel(f"TP [%]")
     ax.grid()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_tp.png')
 
 
-def _plot_color_term(cat_color, delta_magn, flt, out_dir):
+def _plot_color_term(cat_color, delta_magn, flt, out_dir, fitted_line):
     fig, ax = plt.subplots(dpi=300)
 
-    # ax.plot(cat_color, delta_magn, 'k.', markersize=3, label="Data")
-    ax.plot(cat_color, delta_magn, 'k.', markersize=3)
+    ax.plot(cat_color, delta_magn, 'k.', markersize=3, label="Данные")
 
-    # rb_magn_lims = [np.min(cat_color), np.max(cat_color)]
-    # ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'r-', label="Fitted model")
+    color_lims = [np.min(cat_color), np.max(cat_color)]
+    ax.plot(color_lims, fitted_line(color_lims), 'r-', label="Модель")
 
     ax.set_xlabel(r"$M_{r'} - M_{i'}$ [mag]")
     ax.set_ylabel(f"$M_{{{flt}'}} - M'_{{{flt}'}}$ [mag]")
     ax.grid()
-    # ax.legend()
+    ax.legend()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_color_term.png')
 
 
-def _plot_alt_color_term(cat_color, clc_color, out_dir, fitted_line):
+def _plot_alt_color_term(clc_color, cat_color, out_dir, fitted_line):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(cat_color, clc_color, 'k.', markersize=3, label="Data")
+    # ax.plot(clc_color, cat_color, 'k.', markersize=3, label="Данные")
+    ax.plot(clc_color, cat_color, 'k.', markersize=3)
 
-    rb_magn_lims = [np.min(cat_color), np.max(cat_color)]
-    ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'r-', label="Fitted model")
+    # color_lims = [np.min(clc_color), np.max(clc_color)]
+    # ax.plot(color_lims, fitted_line(color_lims), 'r-', label="Модель")
 
-    ax.set_xlabel(r"$M_{r'} - M_{i'}$ [mag]")
-    ax.set_ylabel(r"$M'_{r'} - M'_{i'}$ [mag]")
+    ax.set_xlabel(r"$M'_{r'} - M'_{i'}$ [mag]")
+    ax.set_ylabel(r"$M_{r'} - M_{i'}$ [mag]")
     ax.grid()
-    ax.legend()
+    # ax.legend()
 
     fig.savefig(f'{out_dir}alt_color_term.png')
 
