@@ -106,7 +106,7 @@ def _plot_total_throughput(cat_magn, total_tp, flt, out_dir):
     ax.plot(cat_magn, total_tp, 'k.', markersize=3)
 
     ax.set_xlabel(f"$M_{{{flt}'}}$ [mag]")
-    ax.set_ylabel(f"TP [%]")
+    ax.set_ylabel(f"$TP_{{{flt}'}}$ [%]")
     ax.grid()
 
     fig.savefig(f'{out_dir}{flt}\\{flt}_tp.png')
@@ -176,8 +176,8 @@ def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge, out_dir):
     ax.coords[0].set_major_formatter('dd:mm:ss')
     ax.coords[1].set_major_formatter('dd:mm:ss')
 
-    ax.coords[0].set_axislabel('DEJ2000, deg')
-    ax.coords[1].set_axislabel('RAJ2000, deg')
+    ax.coords[0].set_axislabel('DEJ2000')
+    ax.coords[1].set_axislabel('RAJ2000')
 
     ax.coords.grid(color='blue', ls='--', alpha=0.7)
     # Title overlaps the tick labels
@@ -185,7 +185,7 @@ def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge, out_dir):
 
     # Step 3: Plot data
     ax.imshow(img_data, vmin=dynr_min, vmax=dynr_max, origin='lower', interpolation='nearest', cmap='gray_r')
-    apertures.plot(ax=ax, color='red', lw=0.3, alpha=0.8)
+    apertures.plot(ax=ax, color='red', lw=0.4, alpha=1)
 
     fig.savefig(f"{out_dir}map_{img_header['OBJNAME']}.png")
 

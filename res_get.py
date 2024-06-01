@@ -173,4 +173,4 @@ def _calc_total_throughput(rb_flux, cat, flt_cname, out_dir):
 
     total_tp = rb_flux_med / cat_flux * 100
     _plot_total_throughput(cat_magn, total_tp, flt_cname[0], out_dir)
-    print(f"TP in {flt_cname} {np.median(total_tp)} +/- {np.std(total_tp)} %")
+    print(f"TP in {flt_cname} {np.mean(total_tp)} +/- {np.std(total_tp)} %")
