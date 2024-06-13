@@ -20,15 +20,15 @@ def rm_get_results(flux, magn, merr, cat, cfg, flt_cname):
     clc_magn = fitted_line(magn)
     clc_magn_med = np.nanmedian(clc_magn, axis=0)
 
-    # _calc_magn_delta(clc_magn_med, cat, flt_cname, out_dir)
-    # _calc_magn_std(magn, cat, flt_cname, out_dir)
+    _calc_magn_delta(clc_magn_med, cat, flt_cname, out_dir)
+    _calc_magn_std(magn, cat, flt_cname, out_dir)
 
-    # if merr is not None:
-    #     _calc_merr(clc_magn, merr, flt_cname, out_dir)
+    if merr is not None:
+        _calc_merr(clc_magn, merr, flt_cname, out_dir)
 
-    # if flux is None:
-    #     flux = 80 * np.power(10.0, -0.4 * magn)
-    # _calc_total_throughput(flux, cat, flt_cname, out_dir)
+    if flux is None:
+        flux = 80 * np.power(10.0, -0.4 * magn)
+    _calc_total_throughput(flux, cat, flt_cname, out_dir)
 
     return clc_magn_med, cat
 
@@ -97,15 +97,14 @@ def _get_sigma_clip_mask(rb_magn, cat, flt_cname, out_dir):
     rb_magn_med = np.nanmedian(rb_magn, axis=0)
     cat_magn = cat[flt_cname]
 
-    # _plot_raw_magn(rb_magn_med, cat_magn, flt_cname[0], out_dir)
+    _plot_raw_magn(rb_magn_med, cat_magn, flt_cname[0], out_dir)
 
     # noinspection PyTypeChecker
     sc_fit = FittingWithOutlierRemoval(LinearLSQFitter(), sigma_clip, niter=5, sigma=3.0)
     fitted_line, outliers_mask = sc_fit(Linear1D(), rb_magn_med, cat_magn)
     inliers_mask = np.invert(outliers_mask)
 
-    # TODO: Plot 1\sigma uncertainty
-    # _plot_fitted_magn(rb_magn_med, cat_magn, flt_cname[0], out_dir, inliers_mask, fitted_line)
+    _plot_fitted_magn(rb_magn_med, cat_magn, flt_cname[0], out_dir, inliers_mask, fitted_line)
     print(f"{np.sum(inliers_mask)} stars, {sc_fit.fit_info['niter']} iterations, parameters {fitted_line.parameters},"
           f"std(residuals) {np.std(rb_magn_med - fitted_line(rb_magn_med))}")
 

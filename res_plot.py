@@ -4,10 +4,16 @@ from astropy.stats import sigma_clipped_stats
 from filesys_io import check_out_dir
 
 
+marker_size = 3
+# This is a quick fix to increase apertures visibility
+# I hate image projectors
+# marker_size = 5
+
+
 def _plot_raw_magn(rb_magn, cat_magn, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(rb_magn, cat_magn, 'k.', markersize=3)
+    ax.plot(rb_magn, cat_magn, 'k.', markersize=marker_size)
 
     ax.set_xlabel(f"$m_{{{flt}'}}$ [mag]")
     ax.set_ylabel(f"$M_{{{flt}'}}$ [mag]")
@@ -19,11 +25,11 @@ def _plot_raw_magn(rb_magn, cat_magn, flt, out_dir):
 def _plot_fitted_magn(rb_magn, cat_magn, flt, out_dir, inliers_mask, fitted_line):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(rb_magn[inliers_mask], cat_magn[inliers_mask], 'k.', markersize=3, label="Оставшиеся звезды")
-    ax.plot(rb_magn[~inliers_mask], cat_magn[~inliers_mask], 'r.', markersize=3, label="Исключенные звезды")
+    ax.plot(rb_magn[inliers_mask], cat_magn[inliers_mask], 'k.', markersize=marker_size, label="Оставшиеся звезды")
+    ax.plot(rb_magn[~inliers_mask], cat_magn[~inliers_mask], 'r.', markersize=marker_size, label="Исключенные звезды")
 
     rb_magn_lims = [np.min(rb_magn), np.max(rb_magn)]
-    ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), 'g-', label="Итоговая модель")
+    ax.plot(rb_magn_lims, fitted_line(rb_magn_lims), color='lime', ls='-', label="Итоговая модель")
 
     ax.set_xlabel(f"$m_{{{flt}'}}$ [mag]")
     ax.set_ylabel(f"$M_{{{flt}'}}$ [mag]")
@@ -36,7 +42,7 @@ def _plot_fitted_magn(rb_magn, cat_magn, flt, out_dir, inliers_mask, fitted_line
 def _plot_delta_magn(cat_magn, magn_delta, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(cat_magn, magn_delta, 'k.', markersize=3, label="Данные")
+    ax.plot(cat_magn, magn_delta, 'k.', markersize=marker_size, label="Данные")
 
     # HACK: Quick implementation
     n_bins = 10
@@ -46,7 +52,8 @@ def _plot_delta_magn(cat_magn, magn_delta, flt, out_dir):
     mean_bdots = s_bdots / n_bdots
     std_bdots = np.sqrt(ss_bdots / n_bdots - mean_bdots * mean_bdots)
 
-    ax.errorbar((_[1:] + _[:-1]) / 2, mean_bdots, yerr=std_bdots, fmt='r.', markersize=5, label="Бинированные данные")
+    ax.errorbar((_[1:] + _[:-1]) / 2, mean_bdots, yerr=std_bdots, fmt='r.', markersize=marker_size+3,
+                label="Бинированные данные")
     print(f"delta mean in {flt} {mean_bdots}")
     print(f"delta std in {flt} {std_bdots}")
 
@@ -61,7 +68,7 @@ def _plot_delta_magn(cat_magn, magn_delta, flt, out_dir):
 def _plot_check_magn(clc_magn_med, cat_magn, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(clc_magn_med, cat_magn, 'k.', markersize=3)
+    ax.plot(clc_magn_med, cat_magn, 'k.', markersize=marker_size)
 
     ax.set_xlabel(f"$M'_{{{flt}'}}$ [mag]")
     ax.set_ylabel(f"$M_{{{flt}'}}$ [mag]")
@@ -73,8 +80,8 @@ def _plot_check_magn(clc_magn_med, cat_magn, flt, out_dir):
 def _plot_std_magn(cat_magn, rb_magn_std, otw_magn, otw_std, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(cat_magn, rb_magn_std, 'k.', markersize=3, label="RoboPhot, EXPTIME = 80 сек")
-    ax.plot(otw_magn, otw_std, 'r.', markersize=3, label="1.2-м, EXPTIME = 90 сек")
+    ax.plot(cat_magn, rb_magn_std, 'k.', markersize=marker_size, label="RoboPhot, EXPTIME = 80 сек")
+    ax.plot(otw_magn, otw_std, 'r.', markersize=marker_size, label="1.2-м, EXPTIME = 90 сек")
 
     ax.set_xlabel(f"$M_{{{flt}'}}$ [mag]")
     ax.set_ylabel(f"$\\sigma(m_{{{flt}'}})$ [mag]")
@@ -91,7 +98,7 @@ def _plot_std_magn(cat_magn, rb_magn_std, otw_magn, otw_std, flt, out_dir):
 def _plot_merr(clc_magn_med, rb_merr_med, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(clc_magn_med, rb_merr_med, 'k.', markersize=3)
+    ax.plot(clc_magn_med, rb_merr_med, 'k.', markersize=marker_size)
 
     ax.set_xlabel(f"$\\langle m_{{{flt}'CLC}} \\rangle$ [mag]")
     ax.set_ylabel(f"$\\langle merr_{{{flt}'RB}} \\rangle$ [mag]")
@@ -103,7 +110,7 @@ def _plot_merr(clc_magn_med, rb_merr_med, flt, out_dir):
 def _plot_total_throughput(cat_magn, total_tp, flt, out_dir):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(cat_magn, total_tp, 'k.', markersize=3)
+    ax.plot(cat_magn, total_tp, 'k.', markersize=marker_size)
 
     ax.set_xlabel(f"$M_{{{flt}'}}$ [mag]")
     ax.set_ylabel(f"$TP_{{{flt}'}}$ [%]")
@@ -115,7 +122,7 @@ def _plot_total_throughput(cat_magn, total_tp, flt, out_dir):
 def _plot_color_term(cat_color, delta_magn, flt, out_dir, fitted_line):
     fig, ax = plt.subplots(dpi=300)
 
-    ax.plot(cat_color, delta_magn, 'k.', markersize=3, label="Данные")
+    ax.plot(cat_color, delta_magn, 'k.', markersize=marker_size, label="Данные")
 
     color_lims = [np.min(cat_color), np.max(cat_color)]
     ax.plot(color_lims, fitted_line(color_lims), 'r-', label="Модель")
@@ -131,8 +138,8 @@ def _plot_color_term(cat_color, delta_magn, flt, out_dir, fitted_line):
 def _plot_alt_color_term(clc_color, cat_color, out_dir, fitted_line):
     fig, ax = plt.subplots(dpi=300)
 
-    # ax.plot(clc_color, cat_color, 'k.', markersize=3, label="Данные")
-    ax.plot(clc_color, cat_color, 'k.', markersize=3)
+    # ax.plot(clc_color, cat_color, 'k.', markersize=marker_size, label="Данные")
+    ax.plot(clc_color, cat_color, 'k.', markersize=marker_size)
 
     # color_lims = [np.min(clc_color), np.max(clc_color)]
     # ax.plot(color_lims, fitted_line(color_lims), 'r-', label="Модель")
@@ -185,7 +192,11 @@ def _draw_sky_map(img_header, img_data, img_wcs, apertures, img_edge, out_dir):
 
     # Step 3: Plot data
     ax.imshow(img_data, vmin=dynr_min, vmax=dynr_max, origin='lower', interpolation='nearest', cmap='gray_r')
-    apertures.plot(ax=ax, color='red', lw=0.4, alpha=1)
+
+    apertures.plot(ax=ax, color='red', lw=0.3, alpha=1)
+    # This is a quick fix to increase apertures visibility
+    # I hate image projectors
+    # apertures.plot(ax=ax, color='red', lw=0.9, alpha=1)
 
     fig.savefig(f"{out_dir}map_{img_header['OBJNAME']}.png")
 

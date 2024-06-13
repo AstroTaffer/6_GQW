@@ -70,7 +70,7 @@ i_full_flux, i_full_magn, i_full_merr = read_phot_res(f"{config['OUT_DIR']}i\\",
 # Step 6: Fit and plot results
 r_clc_magn_med, r_sel_cat = rm_get_results(None, r_full_magn, r_full_merr, r_src_cat, config, 'rmag')
 i_clc_magn_med, i_sel_cat = rm_get_results(None, i_full_magn, i_full_merr, i_src_cat, config, 'imag')
-# rm_get_color_terms(r_clc_magn_med, i_clc_magn_med, r_sel_cat, i_sel_cat, config)
+rm_get_color_terms(r_clc_magn_med, i_clc_magn_med, r_sel_cat, i_sel_cat, config)
 # write_phot_res(None, r_sel_magn, None, f"{config['OUT_DIR']}r\\", prefix='r_sel')
 # write_phot_res(None, i_sel_magn, None, f"{config['OUT_DIR']}i\\", prefix='i_sel')
 # write_sel_src_cat(r_sel_cat, f"{config['OUT_DIR']}r\\", prefix='r_sel')

@@ -35,6 +35,7 @@ def _aper_phot_core(ff_list, cat, img_edge, aper_radii, ba_id, out_dir):
 
     fwhm = np.zeros(img_num)
 
+    # for img_id in range(1):
     for img_id in range(img_num):
         header, data = read_fits_file(ff_list[img_id])
         wcs = WCS(header)
